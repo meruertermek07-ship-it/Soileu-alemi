@@ -1759,3 +1759,75 @@ button:active {
     }
 
 }
+/* =================================
+   СЕРГІТУ СӘТІ
+================================= */
+
+.relaxation-content {
+    margin-top: 25px;
+}
+
+.relaxation-video-card {
+    max-width: 850px;
+    margin: 20px auto;
+    padding: 25px;
+    border-radius: 22px;
+    background: white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.relaxation-description {
+    font-size: 17px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.video-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #17132a;
+}
+
+.video-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.video-source {
+    margin-top: 15px;
+    color: #777;
+    font-size: 14px;
+}
+
+.relaxation-video-card a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #7652bd;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.activity-grid button {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.activity-grid button:hover {
+    transform: translateY(-4px);
+}
+
+@media (max-width: 600px) {
+
+    .relaxation-video-card {
+        padding: 14px;
+    }
+
+    .relaxation-description {
+        font-size: 15px;
+    }
+
+}
