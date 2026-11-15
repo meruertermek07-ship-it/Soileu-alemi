@@ -2568,3 +2568,247 @@ function renderOverallProgress() {
         getAverageScore()
     );
 }
+// ==========================================
+// 5-БӨЛІМ. БАҒДАРЛАМАНЫ БІРІКТІРУ
+// ==========================================
+
+
+// Прогресті сақтау функциясын толықтыру
+function saveProgress() {
+
+    try {
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(progressData)
+        );
+
+        renderOverallProgress();
+
+    } catch (error) {
+
+        console.error("Прогресті сақтау қатесі:", error);
+
+        alert(
+            "Нәтижені сақтау мүмкін болмады. " +
+            "Браузер жадының бос орнын тексер."
+        );
+    }
+}
+
+
+// ==========================================
+// ДЕРЕКТЕРДІ ТЕКСЕРУ
+// ==========================================
+
+function validateSpeechTasks() {
+
+    const errors = [];
+    let totalTasks = 0;
+
+    if (!speechTasks || !Array.isArray(SOUND_ORDER)) {
+
+        console.error(
+            "speechTasks немесе SOUND_ORDER табылмады."
+        );
+
+        return false;
+    }
+
+    if (SOUND_ORDER.length !== 10) {
+        errors.push(
+            "Дыбыстар саны 10 болуы керек."
+        );
+    }
+
+    SOUND_ORDER.forEach(soundKey => {
+
+        const sound = speechTasks[soundKey];
+
+        if (!sound) {
+            errors.push(
+                soundKey + " дыбысының деректері жоқ."
+            );
+            return;
+        }
+
+        if (!Array.isArray(sound.stages)) {
+
+            errors.push(
+                soundKey + " дыбысының кезеңдері дұрыс берілмеген."
+            );
+
+            return;
+        }
+
+        if (sound.stages.length !== 4) {
+
+            errors.push(
+                soundKey + " дыбысында 4 кезең болуы керек."
+            );
+        }
+
+        sound.stages.forEach((stage, stageIndex) => {
+
+            if (!Array.isArray(stage.tasks)) {
+
+                errors.push(
+                    soundKey + " дыбысының " +
+                    (stageIndex + 1) +
+                    "-кезеңінде тапсырмалар жоқ."
+                );
+
+                return;
+            }
+
+            if (stage.tasks.length !== 10) {
+
+                errors.push(
+                    soundKey + " дыбысының " +
+                    (stageIndex + 1) +
+                    "-кезеңінде 10 тапсырма жоқ."
+                );
+            }
+
+            totalTasks += stage.tasks.length;
+        });
+    });
+
+    if (totalTasks !== 400) {
+        errors.push(
+            "Жалпы тапсырма саны 400 емес. Қазіргі саны: " +
+            totalTasks
+        );
+    }
+
+    if (errors.length > 0) {
+
+        console.error(
+            "Бағдарлама деректеріндегі қателер:",
+            errors
+        );
+
+        return false;
+    }
+
+    console.log(
+        "Тексеру сәтті аяқталды. 10 дыбыс, 4 кезең, 400 тапсырма."
+    );
+
+    return true;
+}
+
+
+// ==========================================
+// КАМЕРА ЖӘНЕ МИКРОФОН БАТЫРМАЛАРЫ
+// ==========================================
+
+function connectMediaButtons() {
+
+    const cameraButton =
+        document.getElementById("startCameraButton");
+
+    const stopCameraButton =
+        document.getElementById("stopCameraButton");
+
+    const microphoneButton =
+        document.getElementById("startMicrophoneButton");
+
+    const stopMicrophoneButton =
+        document.getElementById("stopMicrophoneButton");
+
+    const breathingButton =
+        document.getElementById("startBreathingButton");
+
+    const stopBreathingButton =
+        document.getElementById("stopBreathingButton");
+
+
+    if (cameraButton) {
+        cameraButton.onclick = startCamera;
+    }
+
+    if (stopCameraButton) {
+        stopCameraButton.onclick = stopCamera;
+    }
+
+    if (microphoneButton) {
+        microphoneButton.onclick = startMicrophone;
+    }
+
+    if (stopMicrophoneButton) {
+        stopMicrophoneButton.onclick = stopMicrophone;
+    }
+
+    if (breathingButton) {
+        breathingButton.onclick = startBreathingExercise;
+    }
+
+    if (stopBreathingButton) {
+        stopBreathingButton.onclick = stopBreathingExercise;
+    }
+}
+
+
+// ==========================================
+// БЕТТЕН ШЫҚҚАНДА МЕДИА ТОҚТАТУ
+// ==========================================
+
+document.addEventListener("visibilitychange", () => {
+
+    if (document.hidden) {
+        stopAllMedia();
+    }
+});
+
+
+// ==========================================
+// БЕТТІ ЖАБУ КЕЗІНДЕ
+// ==========================================
+
+window.addEventListener("pagehide", () => {
+    stopAllMedia();
+});
+
+
+// ==========================================
+// БАҒДАРЛАМА БАСТАЛҒАНДА
+// ==========================================
+
+function initializeProgram() {
+
+    console.log(
+        "Сөйлеу әлеміне саяхат бағдарламасы іске қосылды."
+    );
+
+    const isValid = validateSpeechTasks();
+
+    if (!isValid) {
+
+        console.error(
+            "Деректерде қате бар. data.js файлын тексер."
+        );
+
+    }
+
+    renderOverallProgress();
+
+    connectMediaButtons();
+
+    if (typeof renderSoundMenu === "function") {
+        renderSoundMenu();
+    }
+}
+
+
+// DOM толық жүктелгенде іске қосу
+if (document.readyState === "loading") {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeProgram
+    );
+
+} else {
+
+    initializeProgram();
+}
