@@ -2196,3 +2196,375 @@ function backToMotorMenu() {
 
     currentMotorGame = "";
 }
+// ==========================================
+// 4-БӨЛІМ. БАҒАЛАУ ЖҮЙЕСІ
+// ==========================================
+
+const SCORE_DESCRIPTIONS = {
+    3: "Тапсырманы өз бетінше дұрыс орындады.",
+    2: "Тапсырманы аздаған көмектің көмегімен орындады.",
+    1: "Тапсырманы логопедтің едәуір көмегімен орындады.",
+    0: "Тапсырманы әзірге орындай алмады. Қайталау қажет."
+};
+
+
+// Бағалау батырмаларын белгілеу
+function setTaskScore(score) {
+
+    if (![0, 1, 2, 3].includes(score)) {
+        return;
+    }
+
+    selectedScore = score;
+
+    document.querySelectorAll("[data-score]").forEach(button => {
+
+        const buttonScore = Number(
+            button.getAttribute("data-score")
+        );
+
+        button.classList.toggle(
+            "selected",
+            buttonScore === score
+        );
+    });
+
+    setOptionalText(
+        "taskEvaluation",
+        SCORE_DESCRIPTIONS[score]
+    );
+}
+
+
+// Бағалау нәтижесін көрсету
+function renderTaskScore() {
+
+    const record = getTaskRecord();
+
+    selectedScore =
+        record && Number.isInteger(record.score)
+            ? record.score
+            : null;
+
+    document.querySelectorAll("[data-score]").forEach(button => {
+
+        const score = Number(
+            button.getAttribute("data-score")
+        );
+
+        button.classList.toggle(
+            "selected",
+            score === selectedScore
+        );
+    });
+
+    setOptionalText(
+        "taskEvaluation",
+        selectedScore === null
+            ? "Тапсырманы орындағаннан кейін баға қой."
+            : SCORE_DESCRIPTIONS[selectedScore]
+    );
+}
+
+
+// Тапсырманы сақтау
+function completeTask() {
+
+    if (selectedScore === null) {
+
+        alert("Алдымен тапсырмаға 0–3 аралығында баға қой.");
+        return;
+    }
+
+    const key = getTaskKey();
+
+    progressData[key] = {
+        score: selectedScore,
+        completed: true,
+        updatedAt: new Date().toISOString()
+    };
+
+    saveProgress();
+
+    if (selectedScore === 0) {
+        alert("Бұл тапсырманы кейін қайта орындау қажет.");
+    }
+
+    if (currentTask < 9) {
+
+        currentTask++;
+        openTask();
+
+    } else {
+
+        alert("Кезеңдегі 10 тапсырма қарастырылды.");
+        openStage(currentStage);
+    }
+}
+
+
+// ==========================================
+// ТАПСЫРМАЛАРДЫ ЕСЕПТЕУ
+// ==========================================
+
+// Барлық тапсырманың жалпы саны
+function getTotalTaskCount() {
+
+    let total = 0;
+
+    SOUND_ORDER.forEach(soundKey => {
+
+        const sound = speechTasks[soundKey];
+
+        if (!sound || !Array.isArray(sound.stages)) {
+            return;
+        }
+
+        sound.stages.forEach(stage => {
+            total += stage.tasks.length;
+        });
+    });
+
+    return total;
+}
+
+
+// Орындалған тапсырмаларды санау
+function getCompletedTaskCount() {
+
+    let completed = 0;
+
+    Object.values(progressData).forEach(record => {
+
+        if (
+            record &&
+            record.completed === true &&
+            Number.isInteger(record.score)
+        ) {
+            completed++;
+        }
+    });
+
+    return completed;
+}
+
+
+// 0 балл алған тапсырмаларды санау
+function getZeroScoreCount() {
+
+    let count = 0;
+
+    Object.values(progressData).forEach(record => {
+
+        if (
+            record &&
+            record.completed === true &&
+            record.score === 0
+        ) {
+            count++;
+        }
+    });
+
+    return count;
+}
+
+
+// Орташа балды есептеу
+function getAverageScore() {
+
+    const records = Object.values(progressData).filter(record =>
+        record &&
+        record.completed === true &&
+        Number.isInteger(record.score)
+    );
+
+    if (records.length === 0) {
+        return 0;
+    }
+
+    const total = records.reduce(
+        (sum, record) => sum + record.score,
+        0
+    );
+
+    return (total / records.length).toFixed(2);
+}
+
+
+// Жалпы прогресті есептеу
+function getOverallProgress() {
+
+    const total = getTotalTaskCount();
+
+    if (total === 0) {
+        return 0;
+    }
+
+    return Math.round(
+        getCompletedTaskCount() / total * 100
+    );
+}
+
+
+// ==========================================
+// КЕЗЕҢ ПРОГРЕСІ
+// ==========================================
+
+function getStageProgress(soundKey, stageIndex) {
+
+    const sound = speechTasks[soundKey];
+
+    if (!sound || !sound.stages[stageIndex]) {
+        return 0;
+    }
+
+    const tasks = sound.stages[stageIndex].tasks;
+
+    let completed = 0;
+
+    tasks.forEach((task, taskIndex) => {
+
+        const key =
+            `${soundKey}_${stageIndex}_${taskIndex}`;
+
+        const record = progressData[key];
+
+        if (
+            record &&
+            record.completed === true &&
+            Number.isInteger(record.score)
+        ) {
+            completed++;
+        }
+    });
+
+    return Math.round(
+        completed / tasks.length * 100
+    );
+}
+
+
+// ==========================================
+// ДИПЛОМҒА РҰҚСАТТЫ ТЕКСЕРУ
+// ==========================================
+
+function canEarnDiploma() {
+
+    const total = getTotalTaskCount();
+    const completed = getCompletedTaskCount();
+    const zeroScores = getZeroScoreCount();
+
+    return (
+        total === 400 &&
+        completed === 400 &&
+        zeroScores === 0
+    );
+}
+
+
+// ==========================================
+// ДИПЛОМ
+// ==========================================
+
+function openDiploma() {
+
+    const total = getTotalTaskCount();
+    const completed = getCompletedTaskCount();
+    const zeroScores = getZeroScoreCount();
+
+    if (total !== 400) {
+
+        alert(
+            "Бағдарламада 400 тапсырма толық тіркелмеген. " +
+            "Деректер құрылымын тексеру қажет."
+        );
+
+        return;
+    }
+
+    if (completed < 400) {
+
+        alert(
+            "Диплом алу үшін барлық 400 тапсырманы орындау қажет.\n\n" +
+            "Орындалғаны: " + completed + "/400"
+        );
+
+        return;
+    }
+
+    if (zeroScores > 0) {
+
+        alert(
+            "Диплом алу үшін 0 балл алған тапсырмаларды қайталау қажет.\n\n" +
+            "Қайталануы тиіс тапсырмалар: " + zeroScores
+        );
+
+        return;
+    }
+
+    showPage("diplomaPage");
+
+    setOptionalText(
+        "diplomaStudentName",
+        "Білім алушы"
+    );
+
+    setOptionalText(
+        "diplomaDate",
+        new Date().toLocaleDateString("kk-KZ")
+    );
+
+    setOptionalText(
+        "diplomaProgress",
+        "400 / 400 тапсырма"
+    );
+
+    setOptionalText(
+        "diplomaAverage",
+        getAverageScore() + " / 3"
+    );
+}
+
+
+// Дипломды басып шығару
+function printDiploma() {
+
+    if (!canEarnDiploma()) {
+
+        alert("Дипломға қойылатын талаптар әлі орындалған жоқ.");
+        return;
+    }
+
+    window.print();
+}
+
+
+// ==========================================
+// ЖАЛПЫ НӘТИЖЕ КӨРСЕТКІШІ
+// ==========================================
+
+function renderOverallProgress() {
+
+    const progress = getOverallProgress();
+
+    setOptionalText(
+        "overallProgressText",
+        progress + "%"
+    );
+
+    const bar = document.getElementById("overallProgressBar");
+
+    if (bar) {
+        bar.style.width = progress + "%";
+    }
+
+    setOptionalText(
+        "completedTasksCount",
+        getCompletedTaskCount() + " / 400"
+    );
+
+    setOptionalText(
+        "averageScore",
+        getAverageScore()
+    );
+}
