@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#7654cf">
 
     <title>Сөйлеу әлеміне саяхат</title>
 
@@ -12,348 +11,269 @@
 
 <body>
 
-<!-- ЖОҒАРҒЫ БӨЛІМ -->
-<header class="header">
-    <div class="logo">🌈</div>
+<div class="background-decoration">
+    <span>⭐</span>
+    <span>☁️</span>
+    <span>✨</span>
+    <span>🌈</span>
+</div>
 
-    <div>
+<!-- БАСТЫ БЕТ -->
+
+<section id="homePage" class="page home-page">
+
+    <div class="home-content">
+
+        <div class="home-icon">🌍</div>
+
         <h1>СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ</h1>
-        <p>Дислалияны түзетуге арналған интерактивті бағдарлама</p>
+
+        <p class="home-subtitle">
+            Дыбыстар әлеміне қызықты саяхатқа қош келдің!
+        </p>
+
+        <div class="home-character">🐰</div>
+
+        <p>
+            10 дыбысты меңгеріп, 400 қызықты тапсырманы орында!
+        </p>
+
+        <button class="main-button" onclick="startJourney()">
+            🚀 Саяхатты бастау
+        </button>
+
     </div>
-</header>
+
+</section>
 
 
-<main class="container">
+<!-- ДЫБЫСТАР БЕТІ -->
 
-    <!-- 1. БАСТЫ БЕТ -->
-    <section id="homePage" class="page">
+<section id="soundSection" class="page hidden">
 
-        <div class="welcome-card">
-
-            <div class="welcome-decoration">✨ 🚀 ✨</div>
-
-            <div class="welcome-icon">🌍</div>
-
-            <h2>Қош келдің, жас зерттеуші!</h2>
-
-            <p>
-                Сені ғажайып сөйлеу әлеміне саяхат күтіп тұр!
-                10 дыбысты зерттеп, қызықты логопедиялық
-                тапсырмаларды орында.
-            </p>
-
-            <div class="features">
-                <div class="feature">
-                    <span>🔤</span>
-                    <b>10 дыбыс</b>
-                </div>
-
-                <div class="feature">
-                    <span>🎯</span>
-                    <b>400 тапсырма</b>
-                </div>
-
-                <div class="feature">
-                    <span>🏆</span>
-                    <b>Диплом</b>
-                </div>
-            </div>
-
-            <button
-                id="startButton"
-                class="primary-button"
-                onclick="startJourney()">
-
-                🚀 САЯХАТТЫ БАСТАУ
-
-            </button>
-
-        </div>
-
-
-        <!-- 10 ДЫБЫС -->
-        <div id="soundSection" class="hidden">
-
-            <div class="section-heading">
-                <span>🗺️</span>
-                <h2>ДЫБЫСТЫ ТАҢДА</h2>
-                <p>Қай дыбысты меңгергің келеді?</p>
-            </div>
-
-            <div id="soundMenu" class="sound-grid"></div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- 2. КЕЗЕҢДЕР -->
-    <section id="stagePage" class="page hidden">
+    <header class="page-header">
 
         <button class="back-button" onclick="goHome()">
             ← Басты бет
         </button>
 
-        <div class="section-heading">
+        <h1>ДЫБЫСТАР ӘЛЕМІ</h1>
 
-            <div class="big-icon">🏝️</div>
+        <p>Өзің меңгеретін дыбысты таңда!</p>
 
-            <h2 id="soundTitle">Дыбыс әлемі</h2>
+    </header>
 
-            <p>
-                Дыбысты меңгеру үшін төрт кезеңнен өт!
-            </p>
+    <div id="soundMenu" class="sound-grid"></div>
 
-        </div>
-
-        <div id="stageMenu" class="stage-grid"></div>
-
-    </section>
+</section>
 
 
+<!-- КЕЗЕҢДЕР БЕТІ -->
 
-    <!-- 3. ТАПСЫРМАЛАР -->
-    <section id="taskPage" class="page hidden">
+<section id="stagePage" class="page hidden">
 
-        <button class="back-button" onclick="goStages()">
-            ← Кезеңдерге оралу
+    <header class="page-header">
+
+        <button class="back-button" onclick="goHome()">
+            ← Басты бет
         </button>
 
-        <div class="task-heading">
+        <h1 id="soundTitle">Дыбыс әлемі</h1>
 
-            <div class="task-heading-icon">🎯</div>
+        <p>Төрт кезеңді ретімен орында!</p>
 
-            <h2 id="stageTitle">Дайындық кезеңі</h2>
+    </header>
 
-            <p id="stageDescription">
-                Тапсырмаларды ретімен орында.
-            </p>
+    <div id="stageMenu" class="stage-grid"></div>
 
-        </div>
+</section>
 
 
-        <!-- ПРОГРЕСС -->
+<!-- ТАПСЫРМАЛАР БЕТІ -->
+
+<section id="taskPage" class="page hidden">
+
+    <header class="task-header">
+
+        <button class="back-button" onclick="goStages()">
+            ← Кезеңдер
+        </button>
+
+        <h2 id="stageTitle">Дайындық кезеңі</h2>
+
         <div class="progress-container">
 
-            <div class="progress-information">
-
-                <span>Орындалу барысы</span>
-
-                <strong id="progressText">0%</strong>
-
+            <div class="progress-info">
+                <span>Кезең прогресі</span>
+                <span id="progressText">0%</span>
             </div>
 
             <div class="progress-track">
-
                 <div id="progressBar" class="progress-bar"></div>
-
             </div>
 
-            <p id="taskCounter">0 / 10 тапсырма</p>
+        </div>
+
+        <p id="stageDescription"></p>
+
+    </header>
+
+
+    <main class="task-card">
+
+        <div class="task-top">
+
+            <span id="taskNumber">Тапсырма 1</span>
+
+            <span id="taskCounter">1/10</span>
+
+        </div>
+
+        <div class="task-category" id="taskCategory"></div>
+
+        <h2 id="taskName">Тапсырма атауы</h2>
+
+        <div class="task-visual" id="taskVisual"></div>
+
+        <div class="task-information">
+
+            <h3>🎯 Мақсаты</h3>
+            <p id="taskGoal"></p>
+
+            <h3>📖 Нұсқаулық</h3>
+            <p id="taskInstruction"></p>
+
+            <h3>💡 Үлгі</h3>
+            <p id="taskExample"></p>
+
+            <h3>✅ Тексеру</h3>
+            <p id="taskCheck"></p>
+
+            <h3>🌟 Көмек</h3>
+            <p id="taskHint"></p>
 
         </div>
 
 
-        <!-- ТАПСЫРМА КАРТОЧКАСЫ -->
-        <div class="task-card">
+        <!-- КАМЕРА -->
 
-            <div class="task-top">
+        <div id="cameraSection" class="tool-section hidden">
 
-                <span id="taskNumber">1-тапсырма</span>
+            <h3>📷 Айна жаттығуы</h3>
 
-                <span>⭐</span>
+            <p>
+                Камерадан өзіңді бақылап, үлгіні қайтала.
+            </p>
 
-            </div>
+            <video id="cameraVideo" autoplay playsinline muted></video>
 
+            <div class="tool-buttons">
 
-            <h2 id="taskName">Тапсырма атауы</h2>
-
-
-            <!-- ТАПСЫРМА САНАТЫ -->
-            <div id="taskCategory" class="task-category"></div>
-
-
-            <!-- МАҚСАТ -->
-            <div class="information-box goal-box">
-
-                <h3>🎯 Мақсаты</h3>
-
-                <p id="taskGoal"></p>
-
-            </div>
-
-
-            <!-- НҰСҚАУЛЫҚ -->
-            <div class="information-box instruction-box">
-
-                <h3>📖 Нұсқаулық</h3>
-
-                <p id="taskInstruction"></p>
-
-            </div>
-
-
-            <!-- ҮЛГІ -->
-            <div class="information-box example-box">
-
-                <h3>💡 Үлгі</h3>
-
-                <p id="taskExample"></p>
-
-            </div>
-
-
-            <!-- КӨРНЕКІЛІК -->
-            <div class="visual-container">
-
-                <h3>🖼️ Көрнекілік</h3>
-
-                <div id="taskVisual"></div>
-
-            </div>
-
-
-            <!-- ТЕКСЕРУ -->
-            <div class="information-box check-box">
-
-                <h3>✅ Өзін-өзі тексеру</h3>
-
-                <p id="taskCheck"></p>
-
-            </div>
-
-
-            <!-- КӨМЕК -->
-            <div class="information-box hint-box">
-
-                <h3>🌟 Көмек</h3>
-
-                <p id="taskHint"></p>
-
-            </div>
-
-
-            <!-- КАМЕРА -->
-            <div id="cameraSection" class="tool-section hidden">
-
-                <h3>📷 Айна жаттығуы</h3>
-
-                <video id="cameraVideo" autoplay playsinline muted></video>
-
-                <button onclick="startCamera()" class="secondary-button">
+                <button onclick="startCamera()">
                     Камераны қосу
                 </button>
 
-                <button onclick="stopCamera()" class="secondary-button">
+                <button onclick="stopCamera()">
                     Камераны өшіру
                 </button>
 
-                <p>
-                    Камера артикуляциялық қимылды бақылауға көмектеседі.
-                    Дұрыстығын логопед бағалайды.
-                </p>
-
             </div>
 
+        </div>
 
-            <!-- МИКРОФОН -->
-            <div id="microphoneSection" class="tool-section hidden">
 
-                <h3>🎤 Дыбысты тыңдау</h3>
+        <!-- МИКРОФОН -->
 
-                <button onclick="startMicrophone()" class="secondary-button">
+        <div id="microphoneSection" class="tool-section">
+
+            <h3>🎤 Дауыс жаттығуы</h3>
+
+            <p id="microphoneStatus">
+                Микрофон өшірулі
+            </p>
+
+            <div class="tool-buttons">
+
+                <button onclick="startMicrophone()">
                     Микрофонды қосу
                 </button>
 
-                <button onclick="stopMicrophone()" class="secondary-button">
+                <button onclick="stopMicrophone()">
                     Микрофонды өшіру
                 </button>
 
-                <p id="microphoneStatus">
-                    Микрофон қосылмаған.
-                </p>
-
             </div>
 
+        </div>
 
-            <!-- ОРЫНДАЛДЫ -->
+
+        <!-- ТАПСЫРМАНЫ АЯҚТАУ -->
+
+        <button
+            id="completeButton"
+            class="complete-button"
+            onclick="completeTask()">
+
+            ✓ Тапсырманы орындадым
+
+        </button>
+
+
+        <!-- НАВИГАЦИЯ -->
+
+        <div class="navigation-buttons">
+
             <button
-                id="completeButton"
-                class="complete-button"
-                onclick="completeTask()">
+                id="previousButton"
+                onclick="previousTask()">
 
-                ⭐ ТАПСЫРМАНЫ ОРЫНДАДЫМ
-
-            </button>
-
-        </div>
-
-
-        <!-- АЛҒА / АРТҚА -->
-        <div class="navigation">
-
-            <button onclick="previousTask()">
                 ← Алдыңғы
+
             </button>
 
-            <button onclick="nextTask()">
+            <button
+                id="nextButton"
+                onclick="nextTask()">
+
                 Келесі →
+
             </button>
 
         </div>
 
-    </section>
+    </main>
+
+</section>
 
 
+<!-- ДИПЛОМ -->
 
-    <!-- 4. ДИПЛОМ -->
-    <section id="diplomaPage" class="page hidden">
+<section id="diplomaPage" class="page hidden">
 
-        <div class="diploma-card">
+    <div class="diploma-card">
 
-            <div class="diploma-icon">🏆</div>
+        <div class="diploma-icon">🏆</div>
 
-            <h1>ДЫБЫСТАР ШЕБЕРІ</h1>
+        <h1>ДЫБЫСТАР ШЕБЕРІ</h1>
 
-            <h2>ҚҰТТЫҚТАЙМЫЗ!</h2>
+        <p>
+            Барлық тапсырманы аяқтағаның үшін
+            құттықтаймыз!
+        </p>
 
-            <p>
-                Сен сөйлеу әлеміндегі тапсырмаларды
-                сәтті орындадың!
-            </p>
+        <button onclick="goHome()">
+            Басты бетке оралу
+        </button>
 
-            <div class="diploma-stars">
-                ⭐ ⭐ ⭐ ⭐ ⭐
-            </div>
+    </div>
 
-            <button onclick="goHome()" class="primary-button">
-                Басты бетке оралу
-            </button>
-
-        </div>
-
-    </section>
-
-</main>
+</section>
 
 
+<!-- ФАЙЛДАРДЫ ҚОСУ -->
 
-<!-- ТӨМЕНГІ БӨЛІМ -->
-<footer class="footer">
-
-    <p>🌈 «Сөйлеу әлеміне саяхат»</p>
-
-    <p>Авторлық интерактивті логопедиялық бағдарлама</p>
-
-    <p>© 2026</p>
-
-</footer>
-
-
-
-<!-- JAVASCRIPT ФАЙЛДАРЫ -->
 <script src="data.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>
