@@ -2959,3 +2959,79 @@ function nextRelaxationActivity() {
     renderRelaxationActivity();
 
 }
+// ========================================
+// БАҒАЛАУ ЖҮЙЕСІН ЖАҢАРТУ
+// ========================================
+
+function updateAssessmentPage() {
+
+    const completed = getCompletedTaskCount();
+    const total = getTotalTaskCount();
+
+    const percent = total > 0
+        ? Math.round((completed / total) * 100)
+        : 0;
+
+    const progressBar =
+        document.getElementById("assessmentProgressBar");
+
+    const progressText =
+        document.getElementById("assessmentProgressText");
+
+    const completedCount =
+        document.getElementById("assessmentCompletedCount");
+
+    const average =
+        document.getElementById("averageScore");
+
+    if (progressBar) {
+        progressBar.style.width = percent + "%";
+    }
+
+    if (progressText) {
+        progressText.textContent = percent + "%";
+    }
+
+    if (completedCount) {
+        completedCount.textContent =
+            completed + " / " + total;
+    }
+
+    if (average) {
+        average.textContent =
+            getAverageScore().toFixed(1) + " / 3";
+    }
+}
+
+
+// БАҒАЛАУ БЕТІН АШУ
+
+function openAssessment() {
+
+    showPage("assessmentPage");
+
+    updateAssessmentPage();
+
+    if (typeof renderAssessment === "function") {
+        renderAssessment();
+    }
+
+    updateAssessmentPage();
+}
+
+
+// ПРОГРЕСТІ САҚТАУ
+
+function saveProgress() {
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(progressData)
+    );
+
+    if (typeof renderOverallProgress === "function") {
+        renderOverallProgress();
+    }
+
+    updateAssessmentPage();
+}
