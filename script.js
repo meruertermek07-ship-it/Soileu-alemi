@@ -7,10 +7,8 @@ const stagesPage = document.getElementById("stagesPage");
 const tasksPage = document.getElementById("tasksPage");
 
 function hideAll() {
-  home.classList.add("hidden");
-  soundsPage.classList.add("hidden");
-  stagesPage.classList.add("hidden");
-  tasksPage.classList.add("hidden");
+  [home, soundsPage, stagesPage, tasksPage]
+    .forEach(page => page.classList.add("hidden"));
 }
 
 function startJourney() {
@@ -25,11 +23,13 @@ function showSounds() {
 
   programData.forEach((sound, index) => {
     grid.innerHTML += `
-      <div class="card">
-        <div style="font-size:45px">${sound.icon}</div>
+      <div class="card sound-card">
+        <div class="world-icon">${sound.icon}</div>
         <h2>${sound.letter} дыбысы</h2>
-        <p>${sound.name}</p>
-        <button onclick="openSound(${index})">Таңдау</button>
+        <p>${sound.world}</p>
+        <button onclick="openSound(${index})">
+          Әлемге кіру
+        </button>
       </div>
     `;
   });
@@ -37,28 +37,55 @@ function showSounds() {
 
 function openSound(index) {
   selectedSound = programData[index];
+
   hideAll();
   stagesPage.classList.remove("hidden");
 
   document.getElementById("selectedTitle").innerText =
-    selectedSound.letter + " дыбысы — " + selectedSound.name;
+    selectedSound.letter + " дыбысы — " + selectedSound.world;
 
   const grid = document.getElementById("stageGrid");
   grid.innerHTML = "";
 
   selectedSound.stages.forEach((stage, i) => {
+    const completed = stage.tasks.filter(t => isDone(t.id)).length;
+
     grid.innerHTML += `
-      <div class="card">
-        <h2>${i + 1}-кезең</h2>
+      <div class="card stage-card">
+        <div class="world-icon">🌟</div>
+        <h3>${i + 1}-кезең</h3>
         <p>${stage.title}</p>
-        <button onclick="openStage(${i})">Бастау</button>
+        <p>${completed}/10 тапсырма</p>
+        <button onclick="openStage(${i})">
+          Бастау
+        </button>
       </div>
     `;
   });
 }
 
+function isDone(id) {
+  const done = JSON.parse(
+    localStorage.getItem("soileuDone") || "[]"
+  );
+  return done.includes(id);
+}
+
+function markDone(id) {
+  const done = JSON.parse(
+    localStorage.getItem("soileuDone") || "[]"
+  );
+
+  if (!done.includes(id)) {
+    done.push(id);
+  }
+
+  localStorage.setItem("soileuDone", JSON.stringify(done));
+}
+
 function openStage(index) {
   selectedStage = selectedSound.stages[index];
+
   hideAll();
   tasksPage.classList.remove("hidden");
 
@@ -73,13 +100,48 @@ function renderTasks() {
   grid.innerHTML = "";
 
   selectedStage.tasks.forEach((task, index) => {
+    const done = isDone(task.id);
+
     grid.innerHTML += `
-      <div class="card task-card">
-        <h3>${task.id}. ${task.title}</h3>
-        <p>${task.description}</p>
-        <button onclick="completeTask(${index})">
-          ${task.completed ? "Орындалды ✓" : "Орындадым"}
-        </button>
+      <div class="card task-card ${done ? "completed" : ""}">
+        <div class="task-animation ${task.animation}">
+          ${task.icon}
+        </div>
+
+        <h3>${task.number}. ${task.title}</h3>
+
+        <p>${task.question}</p>
+        <p>${task.instruction}</p>
+
+        ${
+          task.type === "choice"
+          ? `
+            <div class="answer-options">
+              ${task.options.map(option => `
+                <button onclick="checkAnswer('${task.id}', '${option}', '${task.answer}', this)">
+                  ${option}
+                </button>
+              `).join("")}
+            </div>
+          `
+          : `
+            <div class="practice-word">
+              ${task.word || task.syllable || selectedSound.letter}
+            </div>
+
+            <button onclick="speak('${task.word || task.syllable || selectedSound.letter}')">
+              🔊 Тыңдау
+            </button>
+
+            <button onclick="finishSpeaking('${task.id}', this)">
+              Орындадым ✓
+            </button>
+          `
+        }
+
+        <div class="feedback" id="feedback-${task.id}">
+          ${done ? "⭐ Орындалды!" : ""}
+        </div>
       </div>
     `;
   });
@@ -87,34 +149,60 @@ function renderTasks() {
   updateProgress();
 }
 
-function completeTask(index) {
-  selectedStage.tasks[index].completed = true;
-  saveProgress();
-  renderTasks();
+function checkAnswer(id, selected, correct, button) {
+  const feedback = document.getElementById("feedback-" + id);
+
+  if (selected === correct) {
+    markDone(id);
+    feedback.innerHTML = "🎉 Дұрыс! Жарайсың! ⭐";
+    button.classList.add("correct");
+    button.closest(".task-card").classList.add("celebrate");
+    updateProgress();
+  } else {
+    feedback.innerHTML = "😊 Қайта ойланып көр!";
+    button.classList.add("wrong");
+  }
+}
+
+function finishSpeaking(id, button) {
+  markDone(id);
+  button.innerText = "Орындалды ✓";
+  button.disabled = true;
+
+  const feedback = document.getElementById("feedback-" + id);
+  feedback.innerHTML = "🌟 Тамаша! Жаттығу орындалды!";
+
+  button.closest(".task-card").classList.add("celebrate");
+  updateProgress();
 }
 
 function updateProgress() {
-  const completed = selectedStage.tasks.filter(t => t.completed).length;
+  const completed = selectedStage.tasks.filter(
+    task => isDone(task.id)
+  ).length;
+
   const percent = completed * 10;
 
-  document.getElementById("progressBar").style.width = percent + "%";
-  document.getElementById("progressText").innerText =
-    `Орындалды: ${completed}/10 (${percent}%)`;
-}
+  document.getElementById("progressBar").style.width =
+    percent + "%";
 
-function saveProgress() {
-  localStorage.setItem("soileuProgress", JSON.stringify(programData));
+  document.getElementById("progressText").innerText =
+    `⭐ ${completed}/10 тапсырма орындалды — ${percent}%`;
 }
 
 function speak(text) {
   if (!("speechSynthesis" in window)) {
-    alert("Бұл браузерде дыбыстау мүмкіндігі жоқ.");
+    alert("Бұл браузер дыбыстауды қолдамайды.");
     return;
   }
 
-  const message = new SpeechSynthesisUtterance(text);
-  message.lang = "kk-KZ";
-  speechSynthesis.speak(message);
+  speechSynthesis.cancel();
+
+  const voice = new SpeechSynthesisUtterance(text);
+  voice.lang = "kk-KZ";
+  voice.rate = 0.8;
+
+  speechSynthesis.speak(voice);
 }
 
 function goBackToSounds() {
@@ -123,27 +211,4 @@ function goBackToSounds() {
 
 function goBackToStages() {
   openSound(programData.indexOf(selectedSound));
-}
-
-function startCamera() {
-  const video = document.getElementById("camera");
-
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-      video.srcObject = stream;
-    })
-    .catch(() => {
-      alert("Камераға рұқсат берілмеді. Браузер баптауларын тексеріңіз.");
-    });
-}
-
-function startMicrophone() {
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-      alert("Микрофон қосылды! Дыбысты айтып көр.");
-      stream.getTracks().forEach(track => track.stop());
-    })
-    .catch(() => {
-      alert("Микрофонға рұқсат берілмеді.");
-    });
 }
