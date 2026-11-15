@@ -1,27 +1,71 @@
 <!DOCTYPE html>
 <html lang="kk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сөйлеу әлеміне саяхат</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сөйлеу әлеміне саяхат</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <header>
-        <h1>ДИСЛАЛИЯНЫ ТҮЗЕТУ БАҒДАРЛАМАСЫ</h1>
-        <h2>СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ</h2>
-        <p>Әр дыбысты дұрыс айтуға бірге үйренейік!</p>
-        <button onclick="startJourney()">САЯХАТТЫ БАСТАУ</button>
-    </header>
+<header>
+  <h1>✨ ДИСЛАЛИЯНЫ ТҮЗЕТУ БАҒДАРЛАМАСЫ ✨</h1>
+  <p>СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ</p>
+</header>
 
-    <main id="menu" style="display:none;">
-        <h2>Қош келдің, досым!</h2>
-        <p>Бүгін қай дыбыспен жұмыс жасаймыз?</p>
-        <div id="sounds"></div>
-    </main>
+<main class="container">
 
-    <script src="data.js"></script>
-    <script src="script.js"></script>
+<section id="home">
+  <div class="card">
+    <div style="font-size:80px">🐰</div>
+    <h2>Сиқырлы саяхатқа қош келдің!</h2>
+    <p>Дыбыстар әлемін бірге зерттейік!</p>
+    <button onclick="startJourney()">САЯХАТТЫ БАСТАУ</button>
+  </div>
+</section>
+
+<section id="soundsPage" class="hidden">
+  <h2>🌈 Дыбысты таңда</h2>
+  <div id="soundGrid" class="sound-grid"></div>
+</section>
+
+<section id="stagesPage" class="hidden">
+  <h2 id="selectedTitle"></h2>
+  <div id="stageGrid" class="stage-grid"></div>
+  <button onclick="goBackToSounds()">← Артқа</button>
+</section>
+
+<section id="tasksPage" class="hidden">
+  <h2 id="taskTitle"></h2>
+
+  <div class="progress">
+    <div id="progressBar" class="progress-bar"></div>
+  </div>
+
+  <p id="progressText">Орындалды: 0/10 (0%)</p>
+
+  <div id="taskGrid" class="task-grid"></div>
+
+  <div class="card">
+    <h3>🎤 Дыбысты тыңдау</h3>
+    <button onclick="speak(selectedSound.letter)">Дыбысты тыңда</button>
+    <button onclick="startMicrophone()">Микрофон</button>
+    <button onclick="startCamera()">Камераны қосу</button>
+    <video id="camera" autoplay playsinline muted></video>
+  </div>
+
+  <button onclick="goBackToStages()">← Кезеңдерге оралу</button>
+</section>
+
+</main>
+
+<footer>
+  <p>© СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ | Авторлық логопедиялық бағдарлама</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+
 </body>
 </html>
