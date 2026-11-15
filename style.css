@@ -1235,3 +1235,95 @@ button:not(.primary-button) {
   }
 
 }
+/* =================================
+   АРТИКУЛЯЦИЯЛЫҚ ҮЛГІ ДИЗАЙНЫ
+   ================================= */
+
+.articulation-guide {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 22px;
+  margin: 15px 0;
+  box-shadow: 0 5px 20px rgba(40, 40, 90, 0.08);
+}
+
+.articulation-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.articulation-heading h3 {
+  font-size: 20px;
+  color: #34305f;
+}
+
+.articulation-emoji {
+  font-size: 35px;
+}
+
+.articulation-letter {
+  width: 110px;
+  height: 110px;
+  margin: 15px auto;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #8875ed, #55c7db);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 65px;
+  font-weight: bold;
+}
+
+.articulation-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.articulation-detail {
+  background: #f4f2ff;
+  padding: 15px;
+  border-radius: 15px;
+}
+
+.articulation-detail strong {
+  display: block;
+  color: #5146a5;
+  margin-bottom: 8px;
+}
+
+.articulation-detail p {
+  color: #444;
+  line-height: 1.5;
+}
+
+.articulation-exercise {
+  margin-top: 15px;
+  padding: 18px;
+  background: #e9f9f3;
+  border-radius: 15px;
+  line-height: 1.6;
+}
+
+.articulation-exercise strong {
+  color: #17845e;
+}
+
+.articulation-note {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #777;
+}
+
+@media (max-width: 600px) {
+  .articulation-details {
+    grid-template-columns: 1fr;
+  }
+
+  .articulation-heading h3 {
+    font-size: 17px;
+  }
+}
