@@ -1043,3 +1043,11 @@ button,
 }
 
 }
+/* Беттердің дұрыс ашылуын қамтамасыз ету */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
