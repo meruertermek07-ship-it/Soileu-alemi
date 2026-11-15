@@ -1,20 +1,22 @@
-/* =====================================
-   1. НЕГІЗГІ БАПТАУЛАР
-===================================== */
+/* =========================================
+   СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ
+   MAIN DESIGN
+========================================= */
 
 :root {
-    --purple: #7655d9;
-    --purple-dark: #5135aa;
-    --pink: #ff80b5;
-    --cyan: #55c9e8;
-    --yellow: #ffd45e;
-    --mint: #72d9b2;
-    --orange: #ffad69;
+    --purple: #7057d9;
+    --purple-dark: #5038b0;
+    --purple-light: #eeeaff;
+    --pink: #ff80ad;
+    --cyan: #67c9e8;
+    --yellow: #ffd76a;
+    --mint: #8cddc2;
     --white: #ffffff;
-    --text: #37304f;
-    --muted: #77718d;
-    --background: #f5f2ff;
-    --shadow: 0 10px 30px rgba(78, 55, 145, .10);
+    --text: #34304c;
+    --muted: #77738e;
+    --background: #f7f6ff;
+    --border: #e9e5f7;
+    --shadow: 0 10px 30px rgba(75, 57, 145, 0.10);
     --radius: 22px;
 }
 
@@ -29,35 +31,119 @@ html {
 }
 
 body {
-    font-family: "Trebuchet MS", Arial, sans-serif;
-    background:
-        radial-gradient(circle at 10% 10%, #eee5ff, transparent 30%),
-        radial-gradient(circle at 90% 30%, #e2faff, transparent 30%),
-        var(--background);
+    font-family: "Arial", sans-serif;
+    background: var(--background);
     color: var(--text);
+    line-height: 1.6;
     min-height: 100vh;
 }
 
-button {
+button,
+input {
     font: inherit;
+}
+
+button {
     cursor: pointer;
     border: none;
-    transition: .25s ease;
 }
 
-button:active {
-    transform: scale(.97);
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--cyan);
+    outline-offset: 3px;
 }
 
-.hidden {
+[hidden] {
     display: none !important;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.main-header {
+    width: 100%;
+    min-height: 85px;
+    padding: 14px 5%;
+    background: rgba(255, 255, 255, 0.96);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: 0 3px 20px rgba(50, 40, 100, 0.07);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.logo-icon {
+    font-size: 42px;
+}
+
+.header-logo h1 {
+    font-size: 19px;
+    color: var(--purple);
+    line-height: 1.3;
+}
+
+.header-logo p {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.main-nav button {
+    background: transparent;
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.main-nav button:hover {
+    color: var(--purple);
+    background: var(--purple-light);
+}
+
+.menu-toggle {
+    display: none;
+    background: var(--purple);
+    color: white;
+    padding: 9px 13px;
+    border-radius: 10px;
+    font-size: 21px;
+}
+
+/* =========================================
+   PAGE SYSTEM
+========================================= */
+
+main {
+    width: 100%;
+    max-width: 1450px;
+    padding: 30px 5%;
+    margin: auto;
 }
 
 .page {
     display: none;
-    min-height: 75vh;
-    padding: 35px 6%;
-    animation: pageAppear .4s ease;
+    animation: pageAppear 0.35s ease;
 }
 
 .page.active {
@@ -69,372 +155,410 @@ button:active {
         opacity: 0;
         transform: translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-
-/* =====================================
-   2. ЖОҒАРҒЫ МӘЗІР
-===================================== */
-
-.main-header {
-    min-height: 85px;
-    background: rgba(255,255,255,.94);
-    backdrop-filter: blur(12px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 6%;
-    box-shadow: 0 4px 20px rgba(60,40,120,.06);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-icon {
-    font-size: 42px;
-}
-
-.logo h1 {
-    font-size: 21px;
-    color: var(--purple-dark);
-}
-
-.logo p {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-}
-
-.main-header nav {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.main-header nav button {
-    background: transparent;
-    color: var(--text);
-    padding: 11px 15px;
-    border-radius: 14px;
-    font-weight: 700;
-}
-
-.main-header nav button:hover {
-    background: #eee8ff;
-    color: var(--purple);
-}
-
-.menu-toggle {
-    display: none;
-    background: var(--purple);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 12px;
-}
-
-
-/* =====================================
-   3. БАСТЫ БЕТ
-===================================== */
+/* =========================================
+   HERO
+========================================= */
 
 .hero-section {
+    min-height: 440px;
+    padding: 55px;
+    border-radius: 32px;
+    background: linear-gradient(
+        120deg,
+        #e8e1ff,
+        #e1f6ff,
+        #fff0f6
+    );
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 30px;
-    min-height: 400px;
-    padding: 45px;
-    border-radius: 35px;
+    gap: 35px;
     overflow: hidden;
-    background: linear-gradient(120deg, #7655d9, #a27bea, #68cde9);
-    color: white;
-    box-shadow: 0 18px 40px rgba(99,70,190,.20);
     position: relative;
 }
 
 .hero-text {
     max-width: 580px;
-    position: relative;
     z-index: 2;
 }
 
-.welcome-label {
+.hero-label {
     display: inline-block;
-    padding: 9px 16px;
+    color: var(--purple);
+    background: white;
     border-radius: 30px;
-    background: rgba(255,255,255,.19);
-    font-size: 12px;
+    padding: 8px 15px;
+    font-size: 11px;
+    font-weight: bold;
     letter-spacing: 1px;
     margin-bottom: 20px;
 }
 
 .hero-text h2 {
-    font-size: clamp(32px, 5vw, 57px);
-    line-height: 1.12;
+    font-size: clamp(38px, 5vw, 65px);
+    line-height: 1.13;
     margin-bottom: 20px;
+}
+
+.hero-text h2 span {
+    display: block;
+    color: var(--purple);
 }
 
 .hero-text p {
     font-size: 17px;
-    line-height: 1.7;
-    max-width: 490px;
-    margin-bottom: 25px;
+    color: #625d7d;
+    max-width: 450px;
+    margin-bottom: 28px;
 }
 
 .primary-button {
-    background: var(--yellow);
-    color: #57401c;
-    font-weight: 800;
-    padding: 15px 25px;
-    border-radius: 16px;
-    box-shadow: 0 7px 0 #e8b841;
+    padding: 15px 28px;
+    background: linear-gradient(
+        120deg,
+        var(--purple),
+        #9679ed
+    );
+    color: white;
+    border-radius: 15px;
+    font-weight: bold;
+    box-shadow: 0 8px 20px rgba(112, 87, 217, 0.25);
+    transition: 0.25s;
 }
 
 .primary-button:hover {
     transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(112, 87, 217, 0.3);
 }
 
-.hero-illustration {
-    width: 330px;
+.hero-visual {
+    width: 350px;
+    min-width: 250px;
     height: 300px;
     position: relative;
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hero-planet {
-    font-size: 170px;
-    position: absolute;
-    left: 70px;
-    top: 45px;
+    font-size: 155px;
     animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 15px 15px rgba(70, 60, 120, 0.15));
 }
 
 .hero-star {
     position: absolute;
-    right: 20px;
-    top: 15px;
-    font-size: 50px;
-    animation: spin 9s linear infinite;
+    font-size: 35px;
+    animation: float 3s ease-in-out infinite;
 }
 
-.hero-book {
-    position: absolute;
-    left: 10px;
-    bottom: 5px;
-    font-size: 60px;
-    animation: float 3s infinite ease-in-out;
+.star-one {
+    top: 25px;
+    left: 25px;
+}
+
+.star-two {
+    right: 20px;
+    bottom: 30px;
 }
 
 .hero-cloud {
     position: absolute;
-    right: 0;
-    bottom: 15px;
-    font-size: 65px;
+    top: 0;
+    right: 25px;
+    font-size: 55px;
+}
+
+.hero-rainbow {
+    position: absolute;
+    bottom: 0;
+    left: 15px;
+    font-size: 60px;
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-13px);
+    }
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+/* =========================================
+   STATISTICS
+========================================= */
+
+.home-statistics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin: 28px 0;
 }
 
+.stat-card {
+    background: white;
+    padding: 23px 15px;
+    border-radius: var(--radius);
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: 0.25s;
+}
 
-/* =====================================
-   4. БАСТЫ БЕТ КАРТОЧКАЛАРЫ
-===================================== */
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card span {
+    display: block;
+    font-size: 29px;
+}
+
+.stat-card strong {
+    display: block;
+    font-size: 27px;
+    color: var(--purple);
+}
+
+.stat-card p {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+.progress-overview,
+.assessment-progress {
+    background: white;
+    border-radius: var(--radius);
+    padding: 25px;
+    margin: 25px 0;
+    box-shadow: var(--shadow);
+}
+
+.progress-overview h3,
+.assessment-progress h3 {
+    margin-bottom: 15px;
+    color: var(--purple);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.progress-info strong {
+    color: var(--purple);
+}
+
+.progress-track {
+    width: 100%;
+    height: 13px;
+    border-radius: 30px;
+    background: #eeeaf8;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 30px;
+    background: linear-gradient(
+        90deg,
+        var(--purple),
+        var(--pink),
+        var(--cyan)
+    );
+    transition: width 0.4s ease;
+}
+
+.progress-overview > p {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* =========================================
+   FEATURES
+========================================= */
+
+.home-features {
+    margin: 45px 0;
+}
+
+.home-features > h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--purple);
+}
 
 .feature-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-top: 35px;
+    gap: 18px;
 }
 
 .feature-card {
     background: white;
+    padding: 25px 18px;
     border-radius: var(--radius);
-    padding: 27px 22px;
+    text-align: center;
     box-shadow: var(--shadow);
-    transition: .3s;
-    border-bottom: 5px solid var(--purple);
-}
-
-.feature-card:nth-child(2) {
-    border-color: var(--pink);
-}
-
-.feature-card:nth-child(3) {
-    border-color: var(--cyan);
-}
-
-.feature-card:nth-child(4) {
-    border-color: var(--yellow);
+    transition: 0.25s;
 }
 
 .feature-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 15px 35px rgba(70,50,140,.15);
+    transform: translateY(-5px);
 }
 
-.feature-card > span {
-    font-size: 43px;
+.feature-card span {
+    font-size: 40px;
 }
 
 .feature-card h3 {
-    margin: 15px 0 10px;
-    font-size: 19px;
+    margin: 10px 0;
+    color: var(--purple);
 }
 
 .feature-card p {
+    font-size: 13px;
     color: var(--muted);
-    line-height: 1.6;
-    min-height: 50px;
 }
 
-.feature-card button {
-    margin-top: 15px;
-    background: #eee8ff;
-    color: var(--purple-dark);
-    padding: 10px 19px;
-    border-radius: 12px;
-    font-weight: bold;
-}
-
-
-/* =====================================
-   5. БӨЛІМ ТАҚЫРЫПТАРЫ
-===================================== */
+/* =========================================
+   SECTION HEADING
+========================================= */
 
 .section-heading {
     text-align: center;
-    margin: 35px auto;
+    margin: 20px 0 35px;
+    position: relative;
 }
 
 .section-heading h2 {
-    font-size: clamp(26px, 4vw, 36px);
-    color: var(--purple-dark);
-    margin-bottom: 10px;
+    font-size: clamp(25px, 4vw, 36px);
+    color: var(--purple);
+    margin: 15px 0 8px;
 }
 
 .section-heading p {
     color: var(--muted);
-    line-height: 1.6;
 }
 
 .back-button {
-    background: white;
-    color: var(--purple-dark);
-    border-radius: 13px;
-    padding: 12px 18px;
-    box-shadow: var(--shadow);
+    display: inline-block;
+    padding: 10px 17px;
+    border-radius: 12px;
+    background: var(--purple-light);
+    color: var(--purple);
     font-weight: bold;
+    transition: 0.2s;
 }
 
 .back-button:hover {
-    background: #eee8ff;
+    background: var(--purple);
+    color: white;
 }
 
-
-/* =====================================
-   6. ДЫБЫСТАР КАРТОЧКАЛАРЫ
-===================================== */
+/* =========================================
+   SOUND GRID
+========================================= */
 
 .sound-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
-    max-width: 1000px;
-    margin: auto;
+    gap: 18px;
 }
 
 .sound-card {
+    min-height: 145px;
     background: white;
-    border-radius: 24px;
-    padding: 28px 15px;
-    text-align: center;
+    border-radius: var(--radius);
     box-shadow: var(--shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
     border: 2px solid transparent;
-    transition: .3s;
+    transition: 0.25s;
 }
 
 .sound-card:hover {
-    transform: translateY(-8px) rotate(-1deg);
+    transform: translateY(-6px);
     border-color: var(--purple);
 }
 
 .sound-card .sound-letter {
-    font-size: 55px;
-    font-weight: 900;
+    font-size: 42px;
+    font-weight: bold;
     color: var(--purple);
 }
 
 .sound-card h3 {
-    margin-top: 10px;
+    font-size: 15px;
 }
 
 .sound-card p {
+    font-size: 12px;
     color: var(--muted);
-    font-size: 13px;
-    margin-top: 7px;
 }
 
-
-/* =====================================
-   7. КЕЗЕҢДЕР
-===================================== */
+/* =========================================
+   STAGE GRID
+========================================= */
 
 .stage-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 22px;
-    max-width: 900px;
-    margin: auto;
 }
 
 .stage-card {
     background: white;
-    border-radius: 24px;
-    padding: 27px;
-    display: flex;
-    gap: 20px;
-    align-items: center;
+    border-radius: var(--radius);
+    padding: 28px;
     box-shadow: var(--shadow);
-    transition: .3s;
-    text-align: left;
+    border-left: 6px solid var(--purple);
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.stage-card:nth-child(2) {
+    border-left-color: var(--pink);
+}
+
+.stage-card:nth-child(3) {
+    border-left-color: var(--cyan);
+}
+
+.stage-card:nth-child(4) {
+    border-left-color: var(--mint);
 }
 
 .stage-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(70,50,140,.14);
-}
-
-.stage-icon {
-    width: 75px;
-    height: 75px;
-    display: grid;
-    place-items: center;
-    background: #eee8ff;
-    border-radius: 22px;
-    font-size: 35px;
-    flex-shrink: 0;
 }
 
 .stage-card h3 {
-    color: var(--purple-dark);
-    margin-bottom: 8px;
+    color: var(--purple);
+    margin-bottom: 10px;
 }
 
 .stage-card p {
@@ -442,829 +566,955 @@ button:active {
     font-size: 14px;
 }
 
-
-/* =====================================
-   8. ТАПСЫРМА БӨЛІМІ
-===================================== */
-
-.task-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 25px;
+.stage-card .stage-progress {
+    margin-top: 15px;
 }
 
-.task-progress {
+/* =========================================
+   TASK PAGE
+========================================= */
+
+.task-header {
+    margin-bottom: 20px;
+}
+
+.task-progress-info {
     display: flex;
     align-items: center;
     gap: 12px;
-    width: min(450px, 55%);
-    font-weight: bold;
-    color: var(--purple-dark);
+    margin-top: 18px;
 }
 
-.progress-track {
-    height: 12px;
-    background: #e5def8;
-    border-radius: 20px;
+.task-progress-info .progress-track {
     flex: 1;
-    overflow: hidden;
 }
 
-.progress-fill {
-    width: 0;
-    height: 100%;
-    background: linear-gradient(90deg, var(--purple), var(--pink));
-    border-radius: 20px;
-    transition: width .4s;
+.task-progress-info span {
+    font-weight: bold;
+    font-size: 13px;
+    color: var(--purple);
 }
 
-.task-container {
-    max-width: 900px;
-    margin: auto;
+.task-main-card {
     background: white;
     padding: 35px;
     border-radius: 28px;
     box-shadow: var(--shadow);
 }
 
-.task-heading {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.task-heading > span {
+.task-category {
     display: inline-block;
-    background: #f0eaff;
-    color: var(--purple-dark);
-    padding: 9px 16px;
+    padding: 8px 15px;
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: 12px;
+    font-weight: bold;
     border-radius: 30px;
-    font-size: 13px;
 }
 
-.task-heading h2 {
-    margin: 18px 0 10px;
-    font-size: 28px;
+.task-main-card > h2 {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 17px;
 }
 
-.task-heading h3 {
-    font-size: 22px;
+.task-main-card > h3 {
+    font-size: 29px;
+    margin: 8px 0 22px;
     color: var(--purple);
 }
 
-.task-visual-area {
-    background: linear-gradient(135deg, #f1eaff, #e7faff);
-    min-height: 210px;
-    border-radius: 23px;
-    display: grid;
-    place-items: center;
-    padding: 25px;
+.task-visual {
+    min-height: 160px;
+    background: linear-gradient(
+        135deg,
+        #eeeaff,
+        #e5f7ff
+    );
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 75px;
     margin-bottom: 25px;
+    overflow: hidden;
 }
 
-#taskVisual {
-    text-align: center;
-    font-size: 25px;
-    width: 100%;
+.task-information {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
 }
 
 .information-card {
-    background: #faf9ff;
     padding: 20px;
-    border-radius: 18px;
-    margin: 15px 0;
-    border-left: 5px solid var(--purple);
+    border-radius: 16px;
+    background: #faf9ff;
+    border: 1px solid var(--border);
 }
 
-.information-card h3 {
-    margin-bottom: 12px;
-    font-size: 17px;
-    color: var(--purple-dark);
+.information-card h4 {
+    color: var(--purple);
+    margin-bottom: 9px;
 }
 
 .information-card p,
-.information-card div {
-    color: #5d5772;
-    line-height: 1.8;
+.information-card li {
+    font-size: 14px;
+    color: #5e5a74;
 }
 
-.child-action {
-    border-color: var(--pink);
-    background: #fff5fa;
+.information-card ol {
+    padding-left: 20px;
 }
 
-.tool-card {
-    background: #f6f3ff;
-    border-radius: 22px;
+.information-card li {
+    margin: 5px 0;
+}
+
+.example-card {
+    background: #fff9e9;
+}
+
+.help-card {
+    background: #eafaf4;
+}
+
+/* =========================================
+   TOOL SECTIONS
+========================================= */
+
+.tool-section {
+    margin-top: 25px;
     padding: 25px;
-    margin-top: 22px;
+    border-radius: 20px;
+    background: #f7f5ff;
+    border: 1px solid var(--border);
 }
 
-.tool-card h3 {
-    margin-bottom: 17px;
-    color: var(--purple-dark);
-}
-
-.tool-card > button {
-    background: var(--purple);
-    color: white;
-    padding: 12px 18px;
-    border-radius: 12px;
-    margin: 12px 7px 0 0;
-}
-
-.tool-card > button:hover {
-    background: var(--purple-dark);
-}
-
-
-/* =====================================
-   9. КАМЕРА
-===================================== */
-
-.camera-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 20px;
-}
-
-.camera-model,
-.camera-preview {
-    background: white;
-    padding: 15px;
-    border-radius: 18px;
-    min-width: 0;
-}
-
-.camera-model h4,
-.camera-preview h4 {
+.tool-section h3 {
+    color: var(--purple);
     margin-bottom: 12px;
+}
+
+.tool-section p {
+    color: #625d7d;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.articulation-visual {
+    min-height: 160px;
+    background: white;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 75px;
+    margin: 15px 0;
+    padding: 15px;
     text-align: center;
 }
 
-.camera-model > div {
-    min-height: 180px;
-    display: grid;
-    place-items: center;
+#cameraArticulationModel {
+    margin-top: 12px;
 }
 
-.camera-preview video {
+/* =========================================
+   CAMERA
+========================================= */
+
+#cameraVideo {
+    display: block;
     width: 100%;
-    min-height: 180px;
-    max-height: 260px;
+    max-width: 520px;
+    min-height: 220px;
+    max-height: 360px;
+    margin: 15px auto;
+    background: #242033;
+    border-radius: 18px;
     object-fit: cover;
-    background: #29243a;
-    border-radius: 12px;
     transform: scaleX(-1);
 }
 
+.tool-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
 
-/* =====================================
-   10. МИКРОФОН
-===================================== */
+.tool-buttons button,
+#startBreathingButton,
+#stopBreathingButton {
+    padding: 11px 18px;
+    background: var(--purple);
+    color: white;
+    border-radius: 11px;
+    font-weight: bold;
+}
+
+.tool-buttons button:hover,
+#startBreathingButton:hover,
+#stopBreathingButton:hover {
+    background: var(--purple-dark);
+}
+
+/* =========================================
+   AUDIO
+========================================= */
+
+#speechAudio {
+    display: block;
+    width: 100%;
+    margin: 15px 0;
+}
+
+#speechSample {
+    font-size: 22px;
+    color: var(--purple);
+    font-weight: bold;
+}
+
+/* =========================================
+   MICROPHONE
+========================================= */
+
+.volume-container {
+    background: white;
+    padding: 15px;
+    border-radius: 15px;
+}
 
 .volume-track {
-    height: 18px;
-    background: #ded8ef;
+    width: 100%;
+    height: 22px;
+    background: #eeeaf8;
     border-radius: 30px;
-    margin: 20px 0;
     overflow: hidden;
 }
 
 #volumeBar {
-    height: 100%;
     width: 0;
-    background: linear-gradient(90deg, var(--mint), var(--yellow), var(--pink));
+    height: 100%;
     border-radius: 30px;
-    transition: width .1s;
+    background: linear-gradient(
+        90deg,
+        var(--mint),
+        var(--yellow),
+        var(--pink)
+    );
+    transition: width 0.1s;
 }
 
-#microphoneStatus,
-#microphoneMessage {
-    margin-top: 10px;
-}
+/* =========================================
+   BREATHING
+========================================= */
 
-
-/* =====================================
-   11. ТЫНЫС АЛУ ОЙЫНЫ
-===================================== */
-
-.breathing-game {
-    min-height: 180px;
-    background: linear-gradient(135deg, #dff8ff, #f3eaff);
-    border-radius: 20px;
-    display: grid;
-    place-items: center;
+.breathing-playground {
+    height: 180px;
+    padding: 20px;
+    background: linear-gradient(
+        90deg,
+        #e8f8ff,
+        #f7f2ff
+    );
+    border-radius: 18px;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     overflow: hidden;
 }
 
 #cotton {
-    font-size: 65px;
-    transition: transform .25s;
-}
-
-#blowProgress {
-    position: absolute;
-    bottom: 15px;
+    font-size: 42px;
+    position: relative;
     left: 0;
-    width: 0;
-    height: 8px;
-    background: var(--mint);
-    border-radius: 20px;
+    transition: left 0.4s ease;
 }
 
+.breathing-finish {
+    font-size: 35px;
+}
 
-/* =====================================
-   12. БАҒАЛАУ
-===================================== */
+/* =========================================
+   EVALUATION
+========================================= */
 
 .task-evaluation {
-    margin-top: 25px;
-    padding: 23px;
-    background: #fff9e8;
+    background: #fffaf0;
+    border: 1px solid #f4e7c8;
     border-radius: 20px;
+    padding: 25px;
+    margin-top: 28px;
 }
 
 .task-evaluation h3 {
-    color: #8b6423;
-    margin-bottom: 12px;
+    color: #8d6b20;
+    margin-bottom: 10px;
+}
+
+.task-evaluation p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 15px;
 }
 
 .score-buttons {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 18px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 20px 0;
 }
 
 .score-buttons button {
     background: white;
-    border: 2px solid #f0d99d;
-    padding: 13px 8px;
+    border: 1px solid #f0dfb8;
     border-radius: 12px;
-    font-weight: bold;
-    color: #715a2e;
+    padding: 13px;
+    color: #5e512f;
+    transition: 0.2s;
 }
 
-.score-buttons button:hover {
-    background: var(--yellow);
+.score-buttons button:hover,
+.score-buttons button.selected {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: white;
+}
+
+.task-evaluation .primary-button {
+    margin-top: 10px;
 }
 
 .task-navigation {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
-    margin-top: 30px;
+    gap: 15px;
+    margin-top: 25px;
 }
 
-.task-navigation button {
-    padding: 13px 18px;
-    border-radius: 13px;
-    background: #eee8ff;
-    color: var(--purple-dark);
+.task-navigation button,
+.motor-controls button {
+    padding: 12px 18px;
+    background: var(--purple-light);
+    color: var(--purple);
+    border-radius: 12px;
     font-weight: bold;
 }
 
-
-/* =====================================
-   13. СЕРГІТУ СӘТІ
-===================================== */
-
-.activity-grid,
-.motor-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    max-width: 1100px;
-    margin: auto;
+.task-navigation button:hover,
+.motor-controls button:hover {
+    background: var(--purple);
+    color: white;
 }
 
-.activity-grid button,
-.motor-grid button {
-    background: white;
-    padding: 25px 15px;
-    border-radius: 22px;
-    box-shadow: var(--shadow);
-    text-align: center;
-    border-bottom: 5px solid var(--pink);
-}
+/* =========================================
+   ASSESSMENT
+========================================= */
 
-.activity-grid button:nth-child(2),
-.motor-grid button:nth-child(2) {
-    border-color: var(--cyan);
-}
-
-.activity-grid button:nth-child(3),
-.motor-grid button:nth-child(3) {
-    border-color: var(--yellow);
-}
-
-.activity-grid button:nth-child(4),
-.motor-grid button:nth-child(4) {
-    border-color: var(--mint);
-}
-
-.activity-grid button:hover,
-.motor-grid button:hover {
-    transform: translateY(-7px);
-}
-
-.activity-grid button > span,
-.motor-grid button > span {
-    display: block;
-    font-size: 45px;
-    margin-bottom: 14px;
-}
-
-.activity-grid h3,
-.motor-grid h3 {
-    margin-bottom: 10px;
-    color: var(--purple-dark);
-}
-
-.activity-grid p,
-.motor-grid p {
-    color: var(--muted);
-    line-height: 1.5;
-}
-
-
-/* =====================================
-   14. ВИДЕО
-===================================== */
-
-#relaxationVideoList {
+.assessment-summary {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
-    margin: 25px 0;
 }
 
-.video-card {
+.assessment-card {
     background: white;
-    border-radius: 18px;
-    padding: 15px;
-    box-shadow: var(--shadow);
-}
-
-.video-card h4 {
-    margin-bottom: 12px;
-}
-
-.video-card iframe {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border: 0;
-    border-radius: 12px;
-}
-
-.video-card a {
-    display: inline-block;
-    color: var(--purple);
-    margin-top: 12px;
-    font-weight: bold;
-}
-
-
-/* =====================================
-   15. ИНТЕРАКТИВТІ ОЙЫН АЛАҢЫ
-===================================== */
-
-.game-container {
-    max-width: 1000px;
-    margin: 35px auto;
-    background: white;
-    border-radius: 27px;
-    padding: 30px;
-    box-shadow: var(--shadow);
+    padding: 25px;
     text-align: center;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
-.game-container h3 {
-    color: var(--purple-dark);
-    font-size: 25px;
-    margin-bottom: 20px;
+.assessment-card span {
+    font-size: 38px;
 }
 
-#motorVisual {
-    font-size: 45px;
-    margin: 15px;
+.assessment-card h3 {
+    color: var(--purple);
+    font-size: 27px;
+    margin: 8px 0;
 }
 
-#motorInstruction {
-    background: #f4efff;
+.assessment-card p {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+#assessmentProgressText {
+    display: block;
+    color: var(--purple);
+    margin-top: 10px;
+}
+
+.assessment-results {
+    display: grid;
+    gap: 14px;
+    margin-top: 25px;
+}
+
+.assessment-result-card {
+    background: white;
     padding: 18px;
     border-radius: 15px;
-    line-height: 1.7;
-    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+/* =========================================
+   RELAXATION
+========================================= */
+
+.relaxation-categories {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.relaxation-categories button {
+    background: white;
+    padding: 22px 12px;
+    border-radius: 17px;
+    box-shadow: var(--shadow);
+    color: var(--purple);
+    font-weight: bold;
+    transition: 0.25s;
+}
+
+.relaxation-categories button:hover {
+    background: var(--purple);
+    color: white;
+    transform: translateY(-4px);
+}
+
+.relaxation-content {
+    background: white;
+    padding: 25px;
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+}
+
+.video-card h3 {
+    color: var(--purple);
+    margin-bottom: 18px;
+}
+
+#relaxationVideo {
+    width: 100%;
+    min-height: 200px;
+    background: #f4f1ff;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#relaxationVideo iframe {
+    width: 100%;
+    max-width: 850px;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 15px;
+}
+
+.relaxation-content > button {
+    margin-top: 20px;
+}
+
+/* =========================================
+   MOTOR SKILLS MENU
+========================================= */
+
+.motor-menu {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.motor-menu button {
+    min-height: 165px;
+    padding: 22px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.25s;
+    color: var(--text);
+}
+
+.motor-menu button:hover {
+    transform: translateY(-5px);
+    border: 2px solid var(--purple);
+}
+
+.motor-menu button > span:first-child {
+    font-size: 13px;
+}
+
+.motor-menu button {
+    font-size: 14px;
+}
+
+.motor-menu button strong {
+    color: var(--purple);
+    font-size: 17px;
+}
+
+.motor-game {
+    margin-top: 25px;
+    background: white;
+    padding: 25px;
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+}
+
+.motor-game h3 {
+    color: var(--purple);
+    margin-bottom: 10px;
+}
+
+.motor-game > p {
+    color: var(--muted);
+    margin-bottom: 15px;
 }
 
 #motorPlayArea {
-    min-height: 260px;
-    background: #f7faff;
-    border: 2px dashed #c9b8f1;
-    border-radius: 20px;
+    min-height: 220px;
+    background: #f8f6ff;
     padding: 20px;
-    margin: 20px 0;
+    border-radius: 17px;
+    margin: 15px 0;
     overflow: auto;
-    touch-action: pan-y;
 }
 
-.game-container > button {
+#motorResult {
+    color: #248c6c;
+    font-weight: bold;
+    margin: 12px 0;
+}
+
+.motor-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+/* =========================================
+   MOTOR GAME ELEMENTS
+========================================= */
+
+.puzzle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 75px);
+    gap: 5px;
+    justify-content: center;
+}
+
+.puzzle-tile {
+    height: 75px;
     background: var(--purple);
     color: white;
-    padding: 13px 20px;
-    border-radius: 13px;
-    margin: 7px;
-}
-
-
-/* =====================================
-   16. ОЙЫН ЭЛЕМЕНТТЕРІ
-===================================== */
-
-.puzzle-board {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(65px, 110px));
-    gap: 6px;
-    justify-content: center;
-    margin: 20px auto;
-}
-
-.puzzle-piece {
-    aspect-ratio: 1;
-    background: #e8e0ff;
-    border: 2px solid white;
     border-radius: 10px;
-    font-size: 30px;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-.maze-board {
+.puzzle-tile.empty {
+    background: #e8e5f3;
+}
+
+.maze-grid {
     display: grid;
-    grid-template-columns: repeat(7, 42px);
+    grid-template-columns: repeat(7, 38px);
     gap: 3px;
     justify-content: center;
-    margin: 20px auto;
 }
 
 .maze-cell {
-    width: 42px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    border-radius: 6px;
-    background: #e9f8ff;
-    font-size: 23px;
+    width: 38px;
+    height: 38px;
+    border-radius: 5px;
+    background: #e7e3f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.maze-wall {
-    background: #7655d9;
+.maze-cell.wall {
+    background: #625d7d;
 }
 
-.maze-player {
-    background: #ffe5a6;
+.maze-cell.player {
+    background: var(--pink);
 }
 
-.maze-goal {
-    background: #baf3d8;
+.maze-cell.finish {
+    background: var(--mint);
 }
 
 .maze-controls {
     display: grid;
-    grid-template-columns: repeat(3, 55px);
-    gap: 7px;
+    grid-template-columns: repeat(3, 48px);
+    gap: 5px;
     justify-content: center;
-    margin: 15px;
+    margin-top: 15px;
 }
 
 .maze-controls button {
-    background: #eee8ff;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 20px;
-}
-
-.dot-canvas {
-    max-width: 100%;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 15px;
-    touch-action: none;
-}
-
-.color-palette {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin: 15px;
-}
-
-.color-palette button {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 0 0 1px #ddd;
+    height: 43px;
+    border-radius: 9px;
+    background: var(--purple);
+    color: white;
 }
 
 .memory-grid {
     display: grid;
-    grid-template-columns: repeat(4, 70px);
+    grid-template-columns: repeat(4, 75px);
     gap: 10px;
     justify-content: center;
 }
 
 .memory-card {
-    height: 70px;
+    height: 75px;
     border-radius: 12px;
-    background: #e9e0ff;
-    font-size: 28px;
-    display: grid;
-    place-items: center;
+    background: var(--purple);
+    color: white;
+    font-size: 25px;
 }
 
-.drag-item {
-    display: inline-block;
-    padding: 13px 18px;
-    margin: 7px;
-    background: #eee8ff;
-    border-radius: 13px;
-    cursor: grab;
+.memory-card.open,
+.memory-card.matched {
+    background: #e9e5ff;
+    color: var(--purple);
+}
+
+.coloring-canvas {
+    display: block;
+    max-width: 100%;
+    width: 600px;
+    height: 350px;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 15px;
     touch-action: none;
 }
 
-.drop-zone {
-    display: inline-flex;
-    min-width: 110px;
-    min-height: 65px;
-    border: 2px dashed #9f8bd4;
-    background: #f8f5ff;
-    border-radius: 13px;
-    justify-content: center;
-    align-items: center;
-    margin: 8px;
-    padding: 8px;
+.coloring-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
 }
 
-#motorResult {
-    min-height: 30px;
-    margin: 15px;
-    font-weight: bold;
-    color: var(--purple-dark);
+.coloring-controls button {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px #ccc;
 }
 
-
-/* =====================================
-   17. ЖЕТІСТІКТЕР
-===================================== */
-
-.statistics-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 850px;
-    margin: 30px auto;
-}
-
-.stat-card {
-    text-align: center;
-    padding: 25px;
+.motor-option {
+    padding: 12px 18px;
+    margin: 5px;
     background: white;
-    border-radius: 22px;
-    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
 }
 
-.stat-card span {
-    font-size: 38px;
+.motor-option:hover,
+.motor-option.selected {
+    background: var(--purple);
+    color: white;
 }
 
-.stat-card h3 {
+.dots-game button {
+    min-width: 42px;
+    min-height: 42px;
+    border-radius: 50%;
+    background: var(--purple-light);
     color: var(--purple);
-    font-size: 30px;
-    margin: 10px;
+    margin: 7px;
 }
 
-.stat-card p {
-    color: var(--muted);
+.dots-game button.completed {
+    background: var(--mint);
 }
 
-.overall-progress {
-    max-width: 850px;
-    height: 18px;
-    background: #e5def8;
-    border-radius: 20px;
-    margin: 25px auto;
-    overflow: hidden;
+.sorting-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 15px 0;
 }
 
-#totalProgressBar {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, var(--purple), var(--mint));
-    transition: width .4s;
+.sorting-item {
+    background: white;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
 }
 
-#soundResults {
-    max-width: 850px;
-    margin: auto;
-}
-
-
-/* =====================================
-   18. ДИПЛОМ
-===================================== */
+/* =========================================
+   DIPLOMA
+========================================= */
 
 .diploma-card {
-    max-width: 750px;
-    margin: 40px auto;
-    padding: 55px 30px;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 55px 35px;
     text-align: center;
-    border: 9px double #d9ad4b;
-    background: linear-gradient(135deg, #fffdf5, #f2eaff);
-    border-radius: 15px;
+    background: linear-gradient(
+        135deg,
+        #fffdf2,
+        #f2edff,
+        #e8faff
+    );
+    border: 8px double #b49ae9;
+    border-radius: 18px;
     box-shadow: var(--shadow);
 }
 
-.diploma-card h1 {
-    color: #a47a2a;
-    margin-bottom: 25px;
+.diploma-decoration {
+    font-size: 38px;
+    margin-bottom: 15px;
 }
 
 .diploma-card h2 {
-    font-size: 35px;
-    color: var(--purple-dark);
-    margin-bottom: 25px;
+    font-size: 32px;
+    color: var(--purple);
+    letter-spacing: 2px;
 }
 
-.diploma-card p {
-    line-height: 1.8;
-    margin: 15px;
+.diploma-card h3 {
+    margin: 15px 0;
+    color: #8b6b25;
+    letter-spacing: 2px;
 }
 
-.diploma-name {
-    font-size: 24px;
-    margin: 35px;
-    border-bottom: 2px solid #c5a65c;
-    display: inline-block;
-    min-width: 250px;
+.diploma-card > p {
+    margin: 15px 0;
 }
 
-.diploma-card button {
-    background: var(--purple);
-    color: white;
+#diplomaStudentName {
+    display: block;
+    width: 90%;
+    max-width: 420px;
+    margin: 20px auto;
+    padding: 12px;
+    border: 1px solid #c7b8e9;
+    border-radius: 10px;
+    text-align: center;
+    background: white;
+}
+
+.diploma-statistics {
+    margin: 25px 0;
+    line-height: 2;
+}
+
+.diploma-statistics strong {
+    color: var(--purple);
+}
+
+.diploma-footer {
+    color: var(--purple);
+    font-weight: bold;
+    margin-top: 25px;
+}
+
+.diploma-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.diploma-actions button {
     padding: 13px 20px;
     border-radius: 12px;
-    margin: 10px;
+    background: var(--purple);
+    color: white;
+    font-weight: bold;
 }
 
-
-/* =====================================
-   19. FOOTER
-===================================== */
+/* =========================================
+   FOOTER
+========================================= */
 
 .main-footer {
-    text-align: center;
-    background: #4d397e;
-    color: white;
-    padding: 35px 20px;
     margin-top: 50px;
+    padding: 35px 20px;
+    text-align: center;
+    background: #ece8ff;
+    color: #625d7d;
+}
+
+.footer-logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--purple);
+    margin-bottom: 8px;
 }
 
 .main-footer p {
-    margin: 10px;
-    color: #e0d8f8;
-    line-height: 1.6;
+    font-size: 13px;
+    margin: 5px;
 }
 
-.main-footer span {
-    font-size: 12px;
-    opacity: .7;
-}
+/* =========================================
+   RESPONSIVE TABLET
+========================================= */
 
+@media (max-width: 1000px) {
 
-/* =====================================
-   20. МОБИЛЬДІ НҰСҚА
-===================================== */
+    .main-header {
+        padding: 12px 3%;
+    }
 
-@media (max-width: 900px) {
+    .main-nav {
+        gap: 2px;
+    }
 
-    .feature-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .main-nav button {
+        padding: 8px;
+        font-size: 12px;
     }
 
     .sound-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 
-    .activity-grid,
-    .motor-grid {
+    .feature-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .hero-section {
-        padding: 30px;
+    .motor-menu {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .hero-illustration {
-        transform: scale(.8);
-        margin-right: -35px;
+    .relaxation-categories {
+        grid-template-columns: repeat(2, 1fr);
     }
-
 }
 
-@media (max-width: 600px) {
+/* =========================================
+   RESPONSIVE MOBILE
+========================================= */
+
+@media (max-width: 650px) {
+
+    body {
+        font-size: 14px;
+    }
 
     .main-header {
-        padding: 12px 4%;
-    }
-
-    .logo h1 {
-        font-size: 15px;
-    }
-
-    .logo p {
-        font-size: 10px;
+        min-height: 72px;
+        padding: 10px 15px;
     }
 
     .logo-icon {
         font-size: 32px;
     }
 
+    .header-logo h1 {
+        font-size: 15px;
+    }
+
+    .header-logo p {
+        font-size: 10px;
+    }
+
     .menu-toggle {
         display: block;
     }
 
-    .main-header nav {
+    .main-nav {
         display: none;
         position: absolute;
-        top: 75px;
-        right: 10px;
-        left: 10px;
-        background: white;
-        border-radius: 18px;
-        box-shadow: var(--shadow);
+        top: 72px;
+        left: 0;
+        right: 0;
         padding: 15px;
+        background: white;
+        box-shadow: var(--shadow);
         flex-direction: column;
         align-items: stretch;
     }
 
-    .main-header nav.open {
+    .main-nav.open {
         display: flex;
     }
 
-    .page {
-        padding: 22px 4%;
+    .main-nav button {
+        text-align: left;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    main {
+        padding: 18px 14px;
     }
 
     .hero-section {
-        display: block;
-        padding: 27px 22px;
         min-height: auto;
-    }
-
-    .hero-text h2 {
-        font-size: 34px;
+        padding: 30px 22px;
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
     }
 
     .hero-text p {
-        font-size: 15px;
+        font-size: 14px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    .hero-illustration {
-        height: 190px;
+    .hero-visual {
         width: 100%;
-        transform: scale(.75);
-        transform-origin: center top;
-        margin: 10px 0 -35px;
+        height: 200px;
+        min-width: 0;
     }
 
     .hero-planet {
-        left: calc(50% - 90px);
-        top: 5px;
+        font-size: 110px;
+    }
+
+    .hero-text h2 {
+        font-size: 39px;
+    }
+
+    .home-statistics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 17px 10px;
     }
 
     .feature-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
 
     .feature-card {
-        padding: 17px 13px;
+        padding: 18px 10px;
     }
 
-    .feature-card h3 {
-        font-size: 16px;
-    }
-
-    .feature-card p {
-        font-size: 13px;
+    .feature-card span {
+        font-size: 30px;
     }
 
     .sound-grid {
@@ -1273,561 +1523,201 @@ button:active {
     }
 
     .sound-card {
-        padding: 20px 10px;
+        min-height: 125px;
+        padding: 12px;
     }
 
     .sound-card .sound-letter {
-        font-size: 43px;
+        font-size: 35px;
     }
 
     .stage-grid {
         grid-template-columns: 1fr;
+        gap: 14px;
     }
 
-    .stage-card {
-        padding: 20px;
+    .task-main-card {
+        padding: 18px;
     }
 
-    .task-container {
-        padding: 18px 13px;
-    }
-
-    .task-top {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .task-progress {
-        width: 100%;
-    }
-
-    .task-heading h2 {
+    .task-main-card > h3 {
         font-size: 23px;
     }
 
-    .camera-layout {
+    .task-information {
         grid-template-columns: 1fr;
     }
 
+    .tool-section {
+        padding: 16px;
+    }
+
     .score-buttons {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
     }
 
     .task-navigation {
-        flex-wrap: wrap;
+        flex-direction: column;
     }
 
     .task-navigation button {
-        flex: 1;
+        width: 100%;
+    }
+
+    .assessment-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .relaxation-categories {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .relaxation-categories button {
+        padding: 16px 8px;
         font-size: 12px;
     }
 
-    .activity-grid,
-    .motor-grid {
+    .relaxation-content {
+        padding: 15px;
+    }
+
+    .motor-menu {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
-  /* ==================================
-   ҰСАҚ МОТОРИКА ОЙЫНДАРЫ
-================================== */
 
-#motorGame {
-    width: 100%;
-    max-width: 850px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 24px;
-    background: #ffffff;
-    box-shadow: 0 8px 30px rgba(60, 40, 100, 0.12);
-}
-
-#motorTitle {
-    text-align: center;
-    color: #6039a5;
-    font-size: 25px;
-    font-weight: 800;
-}
-
-#motorInstruction {
-    text-align: center;
-    line-height: 1.6;
-    color: #555;
-    font-size: 16px;
-    margin: 15px 0;
-}
-
-#motorPlayArea {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    width: 100%;
-}
-
-#motorResult {
-    padding: 13px;
-    text-align: center;
-    border-radius: 14px;
-    background: #f1edff;
-    color: #57349a;
-    font-weight: 700;
-    min-height: 24px;
-}
-
-.motor-success {
-    background: #dcf8e8 !important;
-    color: #187a45 !important;
-}
-
-
-/* ==================================
-   ПАЗЛ
-================================== */
-
-.puzzle-board {
-    display: grid;
-    grid-template-columns: repeat(3, 85px);
-    grid-template-rows: repeat(3, 85px);
-    gap: 7px;
-    padding: 10px;
-    background: #e9e1ff;
-    border-radius: 18px;
-}
-
-.puzzle-tile {
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(145deg, #9872e8, #6744b7);
-    color: white;
-    font-size: 30px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 4px 7px rgba(50, 30, 100, 0.2);
-}
-
-.puzzle-tile:active {
-    transform: scale(0.94);
-}
-
-.puzzle-empty {
-    background: #f5f2ff;
-    box-shadow: inset 0 0 5px #c9bce9;
-}
-
-
-/* ==================================
-   ЛАБИРИНТ
-================================== */
-
-.maze-board {
-    display: grid;
-    grid-template-columns: repeat(7, 42px);
-    grid-template-rows: repeat(7, 42px);
-    gap: 3px;
-    padding: 8px;
-    background: #eee9ff;
-    border-radius: 14px;
-}
-
-.maze-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #ffffff;
-    border-radius: 6px;
-    font-size: 22px;
-}
-
-.maze-wall {
-    background: #7252b9;
-}
-
-.maze-player {
-    background: #d7f7e6;
-}
-
-.maze-controls {
-    display: grid;
-    grid-template-columns: repeat(3, 55px);
-    gap: 8px;
-    justify-content: center;
-}
-
-.maze-controls button {
-    min-height: 48px;
-    border: none;
-    border-radius: 12px;
-    background: #7954c5;
-    color: white;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-.maze-controls button:active {
-    transform: scale(0.93);
-}
-
-
-/* ==================================
-   НҮКТЕЛЕРДІ ҚОСУ
-================================== */
-
-.dot-canvas {
-    width: min(100%, 320px);
-    height: auto;
-    background: #fffdf7;
-    border: 2px solid #e4d9ff;
-    border-radius: 18px;
-    touch-action: manipulation;
-}
-
-
-/* ==================================
-   СУРЕТТІ БОЯУ
-================================== */
-
-.coloring-canvas {
-    width: min(100%, 320px);
-    height: auto;
-    border: 2px solid #ddd1ff;
-    border-radius: 18px;
-    background: white;
-    touch-action: manipulation;
-}
-
-.color-palette {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-}
-
-.color-button {
-    width: 38px;
-    height: 38px;
-    border: 2px solid #ddd;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.color-button:focus {
-    outline: 3px solid #7954c5;
-    outline-offset: 3px;
-}
-
-
-/* ==================================
-   ЕСТЕ САҚТАУ
-================================== */
-
-.memory-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 65px);
-    gap: 10px;
-    justify-content: center;
-}
-
-.memory-card {
-    width: 65px;
-    height: 70px;
-    border: none;
-    border-radius: 13px;
-    background: linear-gradient(145deg, #a88be9, #6947b5);
-    color: white;
-    font-size: 27px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(50, 30, 100, 0.15);
-}
-
-.memory-card:active {
-    transform: scale(0.95);
-}
-
-
-/* ==================================
-   СҰРЫПТАУ
-================================== */
-
-.sorting-items,
-.sorting-categories {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-}
-
-.sorting-item,
-.drop-zone {
-    padding: 13px 17px;
-    border: 2px solid #e0d5fa;
-    border-radius: 14px;
-    background: #f7f3ff;
-    color: #563a91;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.sorting-item.selected {
-    border-color: #7954c5;
-    background: #e9dfff;
-}
-
-.sorting-item.sorted {
-    opacity: 0.45;
-    text-decoration: line-through;
-}
-
-.sorting-item:disabled {
-    cursor: default;
-}
-
-
-/* ==================================
-   АЙЫРМАШЫЛЫҚТЫ ТАБУ
-================================== */
-
-.difference-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
-
-.difference-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 65px);
-    gap: 5px;
-    padding: 10px;
-    background: #f5f1ff;
-    border-radius: 15px;
-}
-
-.difference-grid button {
-    width: 65px;
-    height: 65px;
-    border: 1px solid #ded5f3;
-    border-radius: 10px;
-    background: white;
-    font-size: 27px;
-    cursor: pointer;
-}
-
-.difference-grid button.difference-found {
-    background: #d9f8e7;
-    border: 2px solid #37ad6b;
-}
-
-
-/* ==================================
-   ОЙЫН БАТЫРМАЛАРЫ
-================================== */
-
-#motorGame button,
-#motorMenu button {
-    transition: 0.2s ease;
-}
-
-#motorGame button:hover,
-#motorMenu button:hover {
-    filter: brightness(1.05);
-}
-
-#motorGame button:focus-visible,
-#motorMenu button:focus-visible {
-    outline: 3px solid #f3bd55;
-    outline-offset: 3px;
-}
-
-
-/* ==================================
-   МОБИЛЬДІК НҰСҚА
-================================== */
-
-@media (max-width: 480px) {
-
-    #motorGame {
+    .motor-menu button {
+        min-height: 135px;
         padding: 12px;
-        border-radius: 18px;
     }
 
-    #motorTitle {
-        font-size: 21px;
+    .motor-game {
+        padding: 15px;
     }
 
-    .puzzle-board {
-        grid-template-columns: repeat(3, 72px);
-        grid-template-rows: repeat(3, 72px);
+    .maze-grid {
+        grid-template-columns: repeat(7, 32px);
     }
 
-    .maze-board {
-        grid-template-columns: repeat(7, 36px);
-        grid-template-rows: repeat(7, 36px);
+    .maze-cell {
+        width: 32px;
+        height: 32px;
     }
 
     .memory-grid {
-        grid-template-columns: repeat(4, 58px);
+        grid-template-columns: repeat(4, minmax(48px, 65px));
         gap: 7px;
     }
 
     .memory-card {
-        width: 58px;
-        height: 62px;
+        height: 60px;
     }
 
-    .difference-grid {
-        grid-template-columns: repeat(3, 55px);
+    .puzzle-grid {
+        grid-template-columns: repeat(3, 65px);
     }
 
-    .difference-grid button {
-        width: 55px;
-        height: 55px;
-    }
-}
-   
-
-    .activity-grid button,
-    .motor-grid button {
-        padding: 19px 9px;
-    }
-
-    .activity-grid h3,
-    .motor-grid h3 {
-        font-size: 15px;
-    }
-
-    #relaxationVideoList {
-        grid-template-columns: 1fr;
-    }
-
-    .game-container {
-        padding: 18px 12px;
-    }
-
-    .statistics-grid {
-        grid-template-columns: 1fr;
+    .puzzle-tile {
+        height: 65px;
     }
 
     .diploma-card {
         padding: 35px 15px;
+        border-width: 5px;
     }
 
     .diploma-card h2 {
-        font-size: 26px;
+        font-size: 24px;
     }
 
-    .maze-board {
-        grid-template-columns: repeat(7, minmax(30px, 38px));
+    .diploma-card h3 {
+        font-size: 17px;
     }
 
-    .maze-cell {
+    .diploma-actions {
+        flex-direction: column;
+    }
+
+    .diploma-actions button {
         width: 100%;
-        height: auto;
-        aspect-ratio: 1;
-        font-size: 18px;
-    }
-
-    .memory-grid {
-        grid-template-columns: repeat(4, 58px);
-    }
-
-    .memory-card {
-        height: 58px;
     }
 
 }
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 360px) {
+
+    .hero-text h2 {
+        font-size: 32px;
+    }
+
+    .sound-card .sound-letter {
+        font-size: 30px;
+    }
+
+    .motor-menu button strong {
+        font-size: 14px;
+    }
+
+    .task-progress-info {
+        gap: 6px;
+    }
+
+}
+
+/* =========================================
+   PRINT DIPLOMA
+========================================= */
 
 @media print {
 
-    body * {
-        visibility: hidden;
+    body {
+        background: white;
     }
 
-    #diplomaPage,
-    #diplomaPage * {
-        visibility: visible;
+    .main-header,
+    .main-footer,
+    .section-heading,
+    .diploma-actions,
+    #homePage,
+    #soundPage,
+    #stagePage,
+    #taskPage,
+    #assessmentPage,
+    #relaxationPage,
+    #motorPage {
+        display: none !important;
+    }
+
+    main {
+        padding: 0;
+        max-width: none;
     }
 
     #diplomaPage {
-        position: absolute;
-        inset: 0;
+        display: block !important;
+    }
+
+    .diploma-card {
+        max-width: none;
         width: 100%;
+        box-shadow: none;
+        margin: 0;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        page-break-inside: avoid;
     }
 
-    .diploma-card button {
-        display: none;
-    }
-
-}
-/* =================================
-   СЕРГІТУ СӘТІ
-================================= */
-
-.relaxation-content {
-    margin-top: 25px;
-}
-
-.relaxation-video-card {
-    max-width: 850px;
-    margin: 20px auto;
-    padding: 25px;
-    border-radius: 22px;
-    background: white;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
-
-.relaxation-description {
-    font-size: 17px;
-    line-height: 1.7;
-    margin-bottom: 20px;
-}
-
-.video-frame {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    border-radius: 16px;
-    background: #17132a;
-}
-
-.video-frame iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-
-.video-source {
-    margin-top: 15px;
-    color: #777;
-    font-size: 14px;
-}
-
-.relaxation-video-card a {
-    display: inline-block;
-    margin-top: 10px;
-    color: #7652bd;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.activity-grid button {
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.activity-grid button:hover {
-    transform: translateY(-4px);
-}
-
-@media (max-width: 600px) {
-
-    .relaxation-video-card {
-        padding: 14px;
-    }
-
-    .relaxation-description {
-        font-size: 15px;
+    #diplomaStudentName {
+        border: none;
+        font-weight: bold;
+        font-size: 22px;
     }
 
 }
