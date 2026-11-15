@@ -1,10 +1,12 @@
 /* =====================================================
    СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ
-   Негізгі басқару жүйесі
+   НЕГІЗГІ БАСҚАРУ ЖҮЙЕСІ
    ===================================================== */
 
 
-/* ---------- 1. НЕГІЗГІ ДЕРЕКТЕР ---------- */
+/* =====================================================
+   1. НЕГІЗГІ БАПТАУЛАР
+   ===================================================== */
 
 const SOUND_ORDER = [
   "R", "L", "G", "GH", "K",
@@ -40,13 +42,356 @@ let microphoneAnimation = null;
 let speechUtterance = null;
 
 
-/* ---------- 2. САҚТАЛҒАН ПРОГРЕСТІ ЖҮКТЕУ ---------- */
+/* =====================================================
+   2. АРТИКУЛЯЦИЯЛЫҚ НҰСҚАУЛЫҚТАР
+   ===================================================== */
+
+const ARTICULATION_GUIDES = {
+
+  R: {
+    sound: "Р",
+    lips: "Ерін еркін, аздап ашық.",
+    tongue: "Тіл ұшы жоғарғы альвеолаға жақындайды.",
+    jaw: "Жақ аздап ашылады.",
+    air: "Ауа ағыны тіл ұшын дірілдетеді.",
+    exercise: "Тіл ұшын жоғарғы альвеолаға жақындатып, дірілдетуге дайындал.",
+    emoji: "👅"
+  },
+
+  L: {
+    sound: "Л",
+    lips: "Ерін еркін қалыпта.",
+    tongue: "Тіл ұшы жоғарғы альвеолаға тіреледі. Ауа тілдің екі бүйірінен өтеді.",
+    jaw: "Жақ аздап ашылады.",
+    air: "Ауа тілдің бүйір жақтарынан шығады.",
+    exercise: "Тіл ұшын жоғарғы альвеолаға тигізіп, тілдің екі бүйірін бос ұста.",
+    emoji: "👅"
+  },
+
+  G: {
+    sound: "Г",
+    lips: "Ерін бейтарап қалыпта.",
+    tongue: "Тілдің артқы бөлігі жұмсақ таңдайға көтеріледі.",
+    jaw: "Жақ аздап ашылады.",
+    air: "Ауа ауыз қуысы арқылы өтеді.",
+    exercise: "Тілдің артқы бөлігін көтеріп, дауыс қатыстыру арқылы дыбысты айт.",
+    emoji: "👄"
+  },
+
+  GH: {
+    sound: "Ғ",
+    lips: "Ерін бейтарап қалыпта.",
+    tongue: "Тілдің артқы бөлігі тілшік маңына жақындайды.",
+    jaw: "Жақ сәл ашылады.",
+    air: "Ауа тарылған саңылаудан үйкеліп өтеді.",
+    exercise: "Тілдің артқы бөлігін көтеріп, дауыс қатыстыру арқылы дыбысты айт.",
+    emoji: "👄"
+  },
+
+  K: {
+    sound: "К",
+    lips: "Ерін бейтарап қалыпта.",
+    tongue: "Тілдің артқы бөлігі жұмсақ таңдайға көтеріледі.",
+    jaw: "Жақ аздап ашылады.",
+    air: "Ауа қысқа кедергіден кейін босап шығады.",
+    exercise: "Тілдің артқы бөлігін көтеріп, дауыссыз дыбысты анық айт.",
+    emoji: "👄"
+  },
+
+  Q: {
+    sound: "Қ",
+    lips: "Ерін бейтарап қалыпта.",
+    tongue: "Тілдің артқы бөлігі тілшікке жақын аймаққа көтеріледі.",
+    jaw: "Жақ сәл ашылады.",
+    air: "Ауа ауыз қуысының артқы бөлігіндегі кедергіден кейін шығады.",
+    exercise: "Тілдің артқы бөлігін көтеріп, дауыссыз дыбысты айт.",
+    emoji: "👄"
+  },
+
+  SH: {
+    sound: "Ш",
+    lips: "Ерін сәл дөңгеленіп, алға созылады.",
+    tongue: "Тіл жүзі жоғары көтеріліп, алдыңғы таңдайға жақындайды.",
+    jaw: "Жақ сәл ашылады.",
+    air: "Ауа тіл мен таңдай арасындағы саңылаудан үйкеліп өтеді.",
+    exercise: "Ерінді сәл дөңгелетіп, тілді жоғары көтеріп, ұзақ «Ш» дыбысын айт.",
+    emoji: "👄"
+  },
+
+  ZH: {
+    sound: "Ж",
+    lips: "Ерін сәл дөңгеленеді.",
+    tongue: "Тіл жүзі жоғары көтеріліп, алдыңғы таңдайға жақындайды.",
+    jaw: "Жақ сәл ашылады.",
+    air: "Ауа тар саңылаудан үйкеліп өтеді, дауыс қатысады.",
+    exercise: "Тілді жоғары көтеріп, дауыс қатыстыру арқылы «Ж» дыбысын айт.",
+    emoji: "👄"
+  },
+
+  Z: {
+    sound: "З",
+    lips: "Ерін еркін қалыпта.",
+    tongue: "Тіл ұшы төменгі тістерге жақын, тіл жүзі альвеолаға қарай көтеріледі.",
+    jaw: "Жақ аздап ашылады.",
+    air: "Ауа тіл мен альвеола арасындағы тар саңылаудан өтеді, дауыс қатысады.",
+    exercise: "Тістерді жақындатып, тілдің алдыңғы бөлігін көтеріп, «З» дыбысын айт.",
+    emoji: "👄"
+  },
+
+  S: {
+    sound: "С",
+    lips: "Ерін еркін, аздап керіледі.",
+    tongue: "Тіл ұшы төменгі тістерге жақын, тіл жүзі альвеолаға қарай көтеріледі.",
+    jaw: "Жақ аздап ашылады.",
+    air: "Ауа тілдің ортасындағы жіңішке саңылаудан өтеді.",
+    exercise: "Тістерді жақындатып, ауа ағынын тілдің ортасымен бағыттап, «С» дыбысын айт.",
+    emoji: "👄"
+  }
+
+};
+
+
+/* =====================================================
+   3. ТІЛДІҢ ОРНАЛАСУ СЫЗБАЛАРЫ
+   ===================================================== */
+
+const TONGUE_POSITIONS = {
+
+  R: {
+    name: "Тіл ұшы жоғары көтерілген",
+    path: "M80 190 Q105 165 135 130 Q150 115 165 130"
+  },
+
+  L: {
+    name: "Тіл ұшы жоғарғы альвеолаға тіреледі",
+    path: "M80 190 Q110 180 140 145 Q155 125 170 115"
+  },
+
+  G: {
+    name: "Тілдің артқы бөлігі көтерілген",
+    path: "M80 190 Q125 190 165 150 Q190 125 220 135"
+  },
+
+  GH: {
+    name: "Тілдің артқы бөлігі тілшікке жақындайды",
+    path: "M80 190 Q130 185 175 145 Q205 115 235 130"
+  },
+
+  K: {
+    name: "Тілдің артқы бөлігі жұмсақ таңдайға көтеріледі",
+    path: "M80 190 Q125 185 165 145 Q190 120 220 135"
+  },
+
+  Q: {
+    name: "Тілдің артқы бөлігі тілшік маңына көтеріледі",
+    path: "M80 190 Q130 185 180 140 Q215 105 245 125"
+  },
+
+  SH: {
+    name: "Тіл жүзі жоғары көтеріліп, алға жылжиды",
+    path: "M80 190 Q110 160 140 135 Q165 125 185 140"
+  },
+
+  ZH: {
+    name: "Тіл жүзі алдыңғы таңдайға жақындайды",
+    path: "M80 190 Q110 160 140 135 Q165 125 185 140"
+  },
+
+  Z: {
+    name: "Тілдің алдыңғы бөлігі альвеолаға жақындайды",
+    path: "M80 190 Q110 180 140 150 Q160 135 175 145"
+  },
+
+  S: {
+    name: "Тілдің ортасында ауа өтетін жіңішке науа түзіледі",
+    path: "M80 190 Q110 175 140 150 Q155 140 175 150"
+  }
+
+};
+
+
+/* =====================================================
+   4. АРТИКУЛЯЦИЯЛЫҚ SVG СЫЗБАСЫН ЖАСАУ
+   ===================================================== */
+
+function createArticulationSVG(soundKey) {
+
+  const position = TONGUE_POSITIONS[soundKey];
+
+  if (!position) return "";
+
+  return `
+    <div class="mouth-diagram">
+
+      <svg
+        viewBox="0 0 320 250"
+        role="img"
+        aria-label="${SOUND_NAMES[soundKey]} дыбысының шартты артикуляциялық сызбасы"
+      >
+
+        <!-- Ауыз қуысы -->
+        <path
+          d="M35 105
+             Q65 55 145 55
+             Q225 45 275 100
+             Q285 130 250 165
+             Q210 205 120 205
+             Q65 200 35 160 Z"
+          fill="#f8d9ce"
+          stroke="#9c625d"
+          stroke-width="3"
+        />
+
+        <!-- Таңдай -->
+        <path
+          d="M45 105
+             Q100 65 175 75
+             Q230 75 265 110"
+          fill="none"
+          stroke="#c47d80"
+          stroke-width="12"
+          stroke-linecap="round"
+        />
+
+        <!-- Тістер -->
+        <path
+          d="M45 115 L45 140
+             M58 110 L58 137
+             M71 105 L71 132"
+          stroke="white"
+          stroke-width="9"
+          stroke-linecap="round"
+        />
+
+        <!-- Тіл -->
+        <path
+          d="${position.path}
+             Q190 195 100 195
+             Q75 195 65 180 Z"
+          fill="#e9828b"
+          stroke="#a94459"
+          stroke-width="3"
+        />
+
+        <!-- Тіл ұшы -->
+        <circle
+          cx="165"
+          cy="130"
+          r="6"
+          fill="#a94459"
+        />
+
+        <!-- Ауа бағыты -->
+        <path
+          d="M80 225 Q125 235 180 220"
+          stroke="#43a7d8"
+          stroke-width="4"
+          stroke-dasharray="7 5"
+          fill="none"
+        />
+
+        <path
+          d="M170 212 L182 220 L169 226"
+          fill="none"
+          stroke="#43a7d8"
+          stroke-width="3"
+        />
+
+      </svg>
+
+      <div class="diagram-caption">
+        <strong>${position.name}</strong>
+        <p>Көк сызық — ауа ағынының шартты бағыты.</p>
+      </div>
+
+    </div>
+  `;
+}
+
+
+/* =====================================================
+   5. АРТИКУЛЯЦИЯЛЫҚ ҮЛГІНІ КӨРСЕТУ
+   ===================================================== */
+
+function renderArticulationGuide(soundKey) {
+
+  const guide = ARTICULATION_GUIDES[soundKey];
+
+  const container = document.getElementById(
+    "articulationVisual"
+  );
+
+  if (!container || !guide) return;
+
+  container.innerHTML = `
+
+    <div class="articulation-guide">
+
+      <div class="articulation-heading">
+        <span class="articulation-emoji">
+          ${guide.emoji}
+        </span>
+
+        <h3>${guide.sound} дыбысының артикуляциясы</h3>
+      </div>
+
+      <div class="articulation-letter">
+        ${guide.sound}
+      </div>
+
+      ${createArticulationSVG(soundKey)}
+
+      <div class="articulation-details">
+
+        <div class="articulation-detail">
+          <strong>Еріннің қалпы</strong>
+          <p>${guide.lips}</p>
+        </div>
+
+        <div class="articulation-detail">
+          <strong>Тілдің қалпы</strong>
+          <p>${guide.tongue}</p>
+        </div>
+
+        <div class="articulation-detail">
+          <strong>Жақтың қалпы</strong>
+          <p>${guide.jaw}</p>
+        </div>
+
+        <div class="articulation-detail">
+          <strong>Ауа ағыны</strong>
+          <p>${guide.air}</p>
+        </div>
+
+      </div>
+
+      <div class="articulation-exercise">
+        <strong>Орындау үлгісі</strong>
+        <p>${guide.exercise}</p>
+      </div>
+
+      <p class="articulation-note">
+        Бұл — оқу мақсатындағы шартты сызба.
+        Нақты артикуляциялық қалыпты логопед көрсетеді.
+      </p>
+
+    </div>
+  `;
+}
+
+
+/* =====================================================
+   6. ПРОГРЕСТІ ЖҮКТЕУ ЖӘНЕ САҚТАУ
+   ===================================================== */
 
 function loadProgress() {
+
   try {
+
     const saved = localStorage.getItem(STORAGE_KEY);
 
     if (saved) {
+
       const data = JSON.parse(saved);
 
       completedTasks = Array.isArray(data.completedTasks)
@@ -54,16 +399,22 @@ function loadProgress() {
         : [];
 
       taskScores = data.taskScores || {};
+
     }
+
   } catch (error) {
+
     console.error("Прогресті жүктеу қатесі:", error);
 
     completedTasks = [];
     taskScores = {};
+
   }
+
 }
 
 function saveProgress() {
+
   const data = {
     completedTasks,
     taskScores
@@ -73,37 +424,47 @@ function saveProgress() {
     STORAGE_KEY,
     JSON.stringify(data)
   );
+
 }
 
 loadProgress();
 
 
-/* ---------- 3. HTML ЭЛЕМЕНТТЕРІМЕН ЖҰМЫС ---------- */
+/* =====================================================
+   7. HTML ЭЛЕМЕНТТЕРІМЕН ЖҰМЫС
+   ===================================================== */
 
 function getElement(id) {
   return document.getElementById(id);
 }
 
 function setText(id, value) {
+
   const element = getElement(id);
 
   if (element) {
     element.textContent = value ?? "";
   }
+
 }
 
 function showSection(id, show) {
+
   const element = getElement(id);
 
   if (element) {
     element.classList.toggle("hidden", !show);
   }
+
 }
 
 
-/* ---------- 4. БЕТТЕР АРАСЫНДА АУЫСУ ---------- */
+/* =====================================================
+   8. БЕТТЕР АРАСЫНДА АУЫСУ
+   ===================================================== */
 
 function showPage(pageId) {
+
   document.querySelectorAll(".page").forEach(page => {
     page.classList.add("hidden");
   });
@@ -117,6 +478,7 @@ function showPage(pageId) {
   stopCamera();
   stopMicrophone();
   stopSpeechSample();
+
 }
 
 function goHome() {
@@ -124,33 +486,50 @@ function goHome() {
 }
 
 function startJourney() {
+
   showPage("soundPage");
+
   renderSoundMenu();
+
 }
 
 function openRelaxation() {
+
   showPage("relaxationPage");
+
   showSection("relaxationMenu", true);
   showSection("relaxationGame", false);
+
   renderRelaxationMenu();
+
 }
 
 function openMotorSkills() {
+
   showPage("motorPage");
+
   showSection("motorMenu", true);
   showSection("motorGame", false);
+
   renderMotorMenu();
+
 }
 
 function openAssessment() {
+
   showPage("assessmentPage");
+
   renderAssessment();
+
 }
 
 
-/* ---------- 5. ДЫБЫСТАР МӘЗІРІ ---------- */
+/* =====================================================
+   9. ДЫБЫСТАР МӘЗІРІ
+   ===================================================== */
 
 function renderSoundMenu() {
+
   const container = getElement("soundMenu");
 
   if (!container) return;
@@ -158,6 +537,7 @@ function renderSoundMenu() {
   container.innerHTML = "";
 
   SOUND_ORDER.forEach((soundKey, index) => {
+
     const soundData = speechTasks[soundKey];
 
     if (!soundData) {
@@ -171,9 +551,11 @@ function renderSoundMenu() {
 
     button.innerHTML = `
       <span class="sound-card-number">${index + 1}</span>
+
       <span class="sound-card-letter">
         ${SOUND_NAMES[soundKey]}
       </span>
+
       <span class="sound-card-title">
         ${soundData.title || SOUND_NAMES[soundKey] + " дыбысы"}
       </span>
@@ -184,13 +566,18 @@ function renderSoundMenu() {
     });
 
     container.appendChild(button);
+
   });
+
 }
 
 
-/* ---------- 6. ДЫБЫСТЫ ТАҢДАУ ---------- */
+/* =====================================================
+   10. ДЫБЫСТЫ ТАҢДАУ
+   ===================================================== */
 
 function selectSound(soundKey) {
+
   if (!speechTasks[soundKey]) {
     alert("Бұл дыбыс бойынша тапсырмалар табылмады.");
     return;
@@ -204,12 +591,16 @@ function selectSound(soundKey) {
 
   renderStageMenu();
   renderTask();
+
 }
 
 
-/* ---------- 7. КЕЗЕҢДЕР МӘЗІРІ ---------- */
+/* =====================================================
+   11. КЕЗЕҢДЕР МӘЗІРІ
+   ===================================================== */
 
 function renderStageMenu() {
+
   const container = getElement("stageMenu");
 
   if (!container || !currentSound) return;
@@ -219,6 +610,7 @@ function renderStageMenu() {
   container.innerHTML = "";
 
   soundData.stages.forEach((stage, index) => {
+
     const button = document.createElement("button");
 
     button.className = "stage-card";
@@ -235,21 +627,28 @@ function renderStageMenu() {
     `;
 
     button.addEventListener("click", () => {
+
       currentStage = index;
       currentTaskIndex = 0;
 
       renderStageMenu();
       renderTask();
+
     });
 
     container.appendChild(button);
+
   });
+
 }
 
 
-/* ---------- 8. АҒЫМДАҒЫ ТАПСЫРМАНЫ АЛУ ---------- */
+/* =====================================================
+   12. АҒЫМДАҒЫ ТАПСЫРМАНЫ АЛУ
+   ===================================================== */
 
 function getCurrentStageData() {
+
   if (!currentSound) return null;
 
   const soundData = speechTasks[currentSound];
@@ -257,9 +656,11 @@ function getCurrentStageData() {
   if (!soundData || !soundData.stages) return null;
 
   return soundData.stages[currentStage] || null;
+
 }
 
 function getCurrentTask() {
+
   const stage = getCurrentStageData();
 
   if (!stage || !Array.isArray(stage.tasks)) {
@@ -267,6 +668,7 @@ function getCurrentTask() {
   }
 
   return stage.tasks[currentTaskIndex] || null;
+
 }
 
 function getTaskKey(task) {
@@ -274,9 +676,12 @@ function getTaskKey(task) {
 }
 
 
-/* ---------- 9. ТАПСЫРМАНЫ КӨРСЕТУ ---------- */
+/* =====================================================
+   13. ТАПСЫРМАНЫ КӨРСЕТУ
+   ===================================================== */
 
 function renderTask() {
+
   const stage = getCurrentStageData();
   const task = getCurrentTask();
 
@@ -316,21 +721,28 @@ function renderTask() {
   );
 
   if (completeButton) {
+
     completeButton.textContent = completed
       ? "Келесі тапсырма"
       : "Тапсырманы аяқтау";
+
   }
 
   showTaskSections(task);
 
   updateTaskProgress();
+
   renderStageMenu();
+
 }
 
 
-/* ---------- 10. ТАПСЫРМА БӨЛІМДЕРІ ---------- */
+/* =====================================================
+   14. ТАПСЫРМА БӨЛІМДЕРІН БАСҚАРУ
+   ===================================================== */
 
 function showTaskSections(task) {
+
   const category = String(task.category || "").toLowerCase();
 
   const articulation =
@@ -354,14 +766,22 @@ function showTaskSections(task) {
   showSection("microphoneSection", microphone);
   showSection("breathingSection", breathing);
 
+  if (articulation) {
+
+    renderArticulationGuide(currentSound);
+
+  } else {
+
+    setText(
+      "articulationVisual",
+      task.articulation || ""
+    );
+
+  }
+
   setText(
     "articulationDescription",
     task.articulation || task.help
-  );
-
-  setText(
-    "articulationVisual",
-    task.articulation || "Артикуляциялық үлгіні мұқият қара."
   );
 
   setText(
@@ -375,12 +795,16 @@ function showTaskSections(task) {
   );
 
   resetBreathingAnimation();
+
 }
 
 
-/* ---------- 11. ТАПСЫРМА ПРОГРЕСІ ---------- */
+/* =====================================================
+   15. ТАПСЫРМА ПРОГРЕСІ
+   ===================================================== */
 
 function updateTaskProgress() {
+
   const completed = getStageCompletedCount(currentStage);
 
   const percent = completed * 10;
@@ -392,9 +816,11 @@ function updateTaskProgress() {
   }
 
   setText("progressText", percent + "%");
+
 }
 
 function getStageCompletedCount(stageIndex) {
+
   const soundData = speechTasks[currentSound];
 
   if (!soundData) return 0;
@@ -406,12 +832,16 @@ function getStageCompletedCount(stageIndex) {
   return stage.tasks.filter(task =>
     completedTasks.includes(getTaskKey(task))
   ).length;
+
 }
 
 
-/* ---------- 12. БАҒАЛАУ ---------- */
+/* =====================================================
+   16. БАҒАЛАУ ШКАЛАСЫ
+   ===================================================== */
 
 function setTaskScore(score) {
+
   const task = getCurrentTask();
 
   if (!task) return;
@@ -432,13 +862,18 @@ function setTaskScore(score) {
   );
 
   updateTaskProgress();
+
   renderAssessment();
+
 }
 
 
-/* ---------- 13. ТАПСЫРМАНЫ АЯҚТАУ ---------- */
+/* =====================================================
+   17. ТАПСЫРМАНЫ АЯҚТАУ
+   ===================================================== */
 
 function completeTask() {
+
   const task = getCurrentTask();
 
   if (!task) return;
@@ -446,8 +881,13 @@ function completeTask() {
   const key = getTaskKey(task);
 
   if (taskScores[key] === undefined) {
-    alert("Алдымен маман бағалау шкаласы арқылы баға қоюы керек.");
+
+    alert(
+      "Алдымен бағалау шкаласы арқылы баға қою керек."
+    );
+
     return;
+
   }
 
   if (!completedTasks.includes(key)) {
@@ -459,44 +899,62 @@ function completeTask() {
   const stage = getCurrentStageData();
 
   if (currentTaskIndex < stage.tasks.length - 1) {
+
     currentTaskIndex++;
+
     renderTask();
+
     return;
+
   }
 
   if (currentStage < 3) {
+
     const continueStage = confirm(
       "Кезең аяқталды! Келесі кезеңге өтесіз бе?"
     );
 
     if (continueStage) {
+
       currentStage++;
       currentTaskIndex = 0;
 
       renderStageMenu();
       renderTask();
+
     }
 
     return;
+
   }
 
   alert("Бұл дыбыстың төрт кезеңі аяқталды!");
 
   showPage("soundPage");
+
   renderSoundMenu();
+
 }
 
 
-/* ---------- 14. АЛДЫҢҒЫ ТАПСЫРМА ---------- */
+/* =====================================================
+   18. АЛДЫҢҒЫ ТАПСЫРМА
+   ===================================================== */
 
 function previousTask() {
+
   if (currentTaskIndex > 0) {
+
     currentTaskIndex--;
+
     renderTask();
+
     return;
+
   }
 
   if (currentStage > 0) {
+
     currentStage--;
 
     const previousStage = getCurrentStageData();
@@ -505,51 +963,80 @@ function previousTask() {
 
     renderStageMenu();
     renderTask();
+
   }
+
 }
 
 
-/* ---------- 15. КЕЛЕСІ ТАПСЫРМА ---------- */
+/* =====================================================
+   19. КЕЛЕСІ ТАПСЫРМА
+   ===================================================== */
 
 function nextTask() {
+
   const stage = getCurrentStageData();
 
   if (!stage) return;
 
   if (currentTaskIndex < stage.tasks.length - 1) {
+
     currentTaskIndex++;
+
     renderTask();
+
     return;
+
   }
 
   if (currentStage < 3) {
+
     currentStage++;
     currentTaskIndex = 0;
 
     renderStageMenu();
     renderTask();
+
     return;
+
   }
 
   alert("Соңғы тапсырмаға жеттіңіз!");
+
 }
 
 
-/* ---------- 16. КАМЕРАНЫ ҚОСУ ---------- */
+/* =====================================================
+   20. КАМЕРАНЫ ҚОСУ
+   ===================================================== */
 
 async function startCamera() {
+
   const video = getElement("cameraVideo");
 
   if (!video) return;
 
   try {
+
     stopCamera();
 
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+      alert("Бұл браузерде камераға қолжетімділік жоқ.");
+
+      return;
+
+    }
+
     cameraStream = await navigator.mediaDevices.getUserMedia({
+
       video: {
         facingMode: "user"
       },
+
       audio: false
+
     });
 
     video.srcObject = cameraStream;
@@ -557,18 +1044,25 @@ async function startCamera() {
     await video.play();
 
   } catch (error) {
+
     console.error("Камера қатесі:", error);
 
     alert(
       "Камера қосылмады. Браузерден камераға рұқсат беріңіз."
     );
+
   }
+
 }
 
 function stopCamera() {
+
   if (cameraStream) {
+
     cameraStream.getTracks().forEach(track => track.stop());
+
     cameraStream = null;
+
   }
 
   const video = getElement("cameraVideo");
@@ -576,12 +1070,16 @@ function stopCamera() {
   if (video) {
     video.srcObject = null;
   }
+
 }
 
 
-/* ---------- 17. ДЫБЫСТЫ ТЫҢДАТУ ---------- */
+/* =====================================================
+   21. МӘТІНДІ ДЫБЫСТАУ
+   ===================================================== */
 
 function playSpeechSample() {
+
   const task = getCurrentTask();
 
   if (!task) return;
@@ -589,13 +1087,19 @@ function playSpeechSample() {
   const text = task.sample || task.example;
 
   if (!text) {
+
     alert("Бұл тапсырмаға дыбыстық үлгі енгізілмеген.");
+
     return;
+
   }
 
   if (!("speechSynthesis" in window)) {
+
     alert("Бұл браузерде мәтінді дыбыстау қолжетімсіз.");
+
     return;
+
   }
 
   stopSpeechSample();
@@ -607,33 +1111,56 @@ function playSpeechSample() {
   speechUtterance.pitch = 1;
 
   speechSynthesis.speak(speechUtterance);
+
 }
 
 function stopSpeechSample() {
+
   if ("speechSynthesis" in window) {
     speechSynthesis.cancel();
   }
 
   speechUtterance = null;
+
 }
 
 
-/* ---------- 18. МИКРОФОН ---------- */
+/* =====================================================
+   22. МИКРОФОН
+   ===================================================== */
 
 async function startMicrophone() {
+
   try {
+
     stopMicrophone();
 
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+      alert("Бұл браузерде микрофонға қолжетімділік жоқ.");
+
+      return;
+
+    }
+
     microphoneStream = await navigator.mediaDevices.getUserMedia({
+
       audio: true
+
     });
 
     const AudioContextClass =
       window.AudioContext || window.webkitAudioContext;
 
     if (!AudioContextClass) {
+
       alert("Бұл браузерде микрофонды талдау қолжетімсіз.");
+
+      stopMicrophone();
+
       return;
+
     }
 
     audioContext = new AudioContextClass();
@@ -653,13 +1180,19 @@ async function startMicrophone() {
     const data = new Uint8Array(analyser.fftSize);
 
     function measureVolume() {
+
+      if (!audioContext || !microphoneStream) return;
+
       analyser.getByteTimeDomainData(data);
 
       let sum = 0;
 
       for (let i = 0; i < data.length; i++) {
+
         const value = (data[i] - 128) / 128;
+
         sum += value * value;
+
       }
 
       const volume = Math.sqrt(sum / data.length);
@@ -678,9 +1211,13 @@ async function startMicrophone() {
       let message = "Дыбыс деңгейі төмен";
 
       if (level > 45) {
+
         message = "Дыбыс деңгейі жоғары";
+
       } else if (level > 15) {
+
         message = "Дыбыс деңгейі орташа";
+
       }
 
       setText("microphoneStatus", message);
@@ -690,33 +1227,49 @@ async function startMicrophone() {
 
       microphoneAnimation =
         requestAnimationFrame(measureVolume);
+
     }
 
     measureVolume();
 
   } catch (error) {
+
     console.error("Микрофон қатесі:", error);
+
+    stopMicrophone();
 
     alert(
       "Микрофон қосылмады. Браузерден микрофонға рұқсат беріңіз."
     );
+
   }
+
 }
 
 function stopMicrophone() {
+
   if (microphoneAnimation) {
+
     cancelAnimationFrame(microphoneAnimation);
+
     microphoneAnimation = null;
+
   }
 
   if (microphoneStream) {
+
     microphoneStream.getTracks().forEach(track => track.stop());
+
     microphoneStream = null;
+
   }
 
   if (audioContext) {
+
     audioContext.close();
+
     audioContext = null;
+
   }
 
   const bar = getElement("volumeBar");
@@ -726,12 +1279,16 @@ function stopMicrophone() {
   }
 
   setText("microphoneStatus", "Микрофон өшірулі");
+
 }
 
 
-/* ---------- 19. ТЫНЫС АЛУ АНИМАЦИЯСЫ ---------- */
+/* =====================================================
+   23. ТЫНЫС АЛУ АНИМАЦИЯСЫ
+   ===================================================== */
 
 function updateCotton(level) {
+
   const cotton = getElement("cotton");
 
   if (!cotton) return;
@@ -742,15 +1299,30 @@ function updateCotton(level) {
     `translate(${movement}px, -${movement * 0.25}px)`;
 
   if (level > 15) {
-    setText("blowMessage", "Жақсы! Дыбыс деңгейі байқалды.");
+
+    setText(
+      "blowMessage",
+      "Дыбыс деңгейі байқалды."
+    );
+
   } else {
-    setText("blowMessage", "Микрофонға жақын сөйлеп көр.");
+
+    setText(
+      "blowMessage",
+      "Микрофонды қосып көр."
+    );
+
   }
 
-  setText("blowProgress", Math.min(level, 100) + "%");
+  setText(
+    "blowProgress",
+    Math.min(level, 100) + "%"
+  );
+
 }
 
 function resetBreathingAnimation() {
+
   const cotton = getElement("cotton");
 
   if (cotton) {
@@ -759,35 +1331,46 @@ function resetBreathingAnimation() {
 
   setText("blowProgress", "0%");
   setText("blowMessage", "Микрофонды қосып көр.");
+
 }
 
 
-/* ---------- 20. СЕРГІТУ СӘТІ ---------- */
+/* =====================================================
+   24. СЕРГІТУ СӘТІ
+   ===================================================== */
 
 const relaxationActivities = [
+
   {
     title: "Күнге созыл",
     visual: "☀️",
     instruction: "Қолдарыңды жоғары көтеріп, денеңді жайлап соз. Содан кейін қолдарыңды түсір."
   },
+
   {
     title: "Көбелек",
     visual: "🦋",
     instruction: "Қолдарыңды екі жаққа созып, көбелектің қанаты сияқты жайлап қозға."
   },
+
   {
     title: "Ағаштар тербеледі",
     visual: "🌳",
     instruction: "Қолдарыңды жоғары көтер. Оңға және солға жайлап еңкей."
   },
+
   {
     title: "Жаңбыр тамшылары",
     visual: "🌧️",
     instruction: "Саусақтарыңмен үстелді жайлап тықылдатып, жаңбыр дыбысын бейнеле."
   }
+
 ];
 
+let currentRelaxationIndex = 0;
+
 function renderRelaxationMenu() {
+
   const container = getElement("relaxationMenu");
 
   if (!container) return;
@@ -795,6 +1378,7 @@ function renderRelaxationMenu() {
   container.innerHTML = "";
 
   relaxationActivities.forEach((activity, index) => {
+
     const button = document.createElement("button");
 
     button.className = "activity-card";
@@ -809,12 +1393,13 @@ function renderRelaxationMenu() {
     });
 
     container.appendChild(button);
+
   });
+
 }
 
-let currentRelaxationIndex = 0;
-
 function startRelaxationGame(index = 0) {
+
   currentRelaxationIndex = index;
 
   const activity = relaxationActivities[index];
@@ -827,9 +1412,11 @@ function startRelaxationGame(index = 0) {
   setText("relaxationTitle", activity.title);
   setText("relaxationVisual", activity.visual);
   setText("relaxationInstruction", activity.instruction);
+
 }
 
 function nextRelaxationActivity() {
+
   currentRelaxationIndex++;
 
   if (currentRelaxationIndex >= relaxationActivities.length) {
@@ -837,35 +1424,46 @@ function nextRelaxationActivity() {
   }
 
   startRelaxationGame(currentRelaxationIndex);
+
 }
 
 
-/* ---------- 21. ҰСАҚ МОТОРИКА ---------- */
+/* =====================================================
+   25. ҰСАҚ МОТОРИКА
+   ===================================================== */
 
 const motorActivities = [
+
   {
     title: "Саусақ жаттығуы",
     visual: "✋",
     instruction: "Бас бармақты кезекпен басқа саусақтарға тигіз."
   },
+
   {
     title: "Моншақ тізу",
     visual: "📿",
     instruction: "Моншақтарды бірінен соң бірін ретімен орналастыр."
   },
+
   {
     title: "Саусақпен сана",
     visual: "🔢",
     instruction: "Бірден беске дейін саусақтарыңды кезекпен көрсет."
   },
+
   {
     title: "Өрнек құрастыр",
     visual: "🧩",
     instruction: "Берілген бөлшектерден қарапайым өрнек құрастыр."
   }
+
 ];
 
+let currentMotorIndex = 0;
+
 function renderMotorMenu() {
+
   const container = getElement("motorMenu");
 
   if (!container) return;
@@ -873,6 +1471,7 @@ function renderMotorMenu() {
   container.innerHTML = "";
 
   motorActivities.forEach((activity, index) => {
+
     const button = document.createElement("button");
 
     button.className = "activity-card";
@@ -887,12 +1486,13 @@ function renderMotorMenu() {
     });
 
     container.appendChild(button);
+
   });
+
 }
 
-let currentMotorIndex = 0;
-
 function startMotorGame(index = 0) {
+
   currentMotorIndex = index;
 
   const activity = motorActivities[index];
@@ -906,16 +1506,20 @@ function startMotorGame(index = 0) {
   setText("motorVisual", activity.visual);
   setText("motorInstruction", activity.instruction);
   setText("motorResult", "");
+
 }
 
 function checkMotorGame() {
+
   setText(
     "motorResult",
     "Жаттығу орындалды! Маман баланың әрекетін бақылайды."
   );
+
 }
 
 function nextMotorGame() {
+
   currentMotorIndex++;
 
   if (currentMotorIndex >= motorActivities.length) {
@@ -923,32 +1527,47 @@ function nextMotorGame() {
   }
 
   startMotorGame(currentMotorIndex);
+
 }
 
 
-/* ---------- 22. ЖАЛПЫ БАҒАЛАУ ---------- */
+/* =====================================================
+   26. БАРЛЫҚ ТАПСЫРМАЛАРДЫ ЖИНАҚТАУ
+   ===================================================== */
 
 function getAllTasks() {
+
   const allTasks = [];
 
   SOUND_ORDER.forEach(soundKey => {
+
     const sound = speechTasks[soundKey];
 
     if (!sound || !sound.stages) return;
 
     sound.stages.forEach(stage => {
+
       if (!Array.isArray(stage.tasks)) return;
 
       stage.tasks.forEach(task => {
         allTasks.push(task);
       });
+
     });
+
   });
 
   return allTasks;
+
 }
 
+
+/* =====================================================
+   27. ЖАЛПЫ БАҒАЛАУ
+   ===================================================== */
+
 function renderAssessment() {
+
   const allTasks = getAllTasks();
 
   const total = allTasks.length;
@@ -957,8 +1576,15 @@ function renderAssessment() {
     completedTasks.includes(getTaskKey(task))
   ).length;
 
-  const totalScore = Object.values(taskScores)
-    .reduce((sum, score) => sum + Number(score || 0), 0);
+  const totalScore = allTasks.reduce((sum, task) => {
+
+    const score = taskScores[getTaskKey(task)];
+
+    return sum + (
+      score !== undefined ? Number(score) : 0
+    );
+
+  }, 0);
 
   const maxScore = total * 3;
 
@@ -977,9 +1603,16 @@ function renderAssessment() {
   }
 
   renderSoundResults();
+
 }
 
+
+/* =====================================================
+   28. ӘР ДЫБЫСТЫҢ НӘТИЖЕСІ
+   ===================================================== */
+
 function renderSoundResults() {
+
   const container = getElement("soundResults");
 
   if (!container) return;
@@ -987,6 +1620,7 @@ function renderSoundResults() {
   container.innerHTML = "";
 
   SOUND_ORDER.forEach(soundKey => {
+
     const sound = speechTasks[soundKey];
 
     if (!sound) return;
@@ -995,7 +1629,9 @@ function renderSoundResults() {
     let score = 0;
 
     sound.stages.forEach(stage => {
+
       stage.tasks.forEach(task => {
+
         const key = getTaskKey(task);
 
         if (completedTasks.includes(key)) {
@@ -1005,7 +1641,9 @@ function renderSoundResults() {
         if (taskScores[key] !== undefined) {
           score += Number(taskScores[key]);
         }
+
       });
+
     });
 
     const row = document.createElement("div");
@@ -1019,13 +1657,18 @@ function renderSoundResults() {
     `;
 
     container.appendChild(row);
+
   });
+
 }
 
 
-/* ---------- 23. ДИПЛОМ ---------- */
+/* =====================================================
+   29. ДИПЛОМ
+   ===================================================== */
 
 function openDiploma() {
+
   showPage("diplomaPage");
 
   const allTasks = getAllTasks();
@@ -1044,6 +1687,7 @@ function openDiploma() {
     "diplomaDate",
     new Date().toLocaleDateString("kk-KZ")
   );
+
 }
 
 function printDiploma() {
@@ -1051,46 +1695,71 @@ function printDiploma() {
 }
 
 
-/* ---------- 24. ДЕРЕКТЕРДІ ТЕКСЕРУ ---------- */
+/* =====================================================
+   30. БАҒДАРЛАМА ДЕРЕКТЕРІН ТЕКСЕРУ
+   ===================================================== */
 
 function validateSpeechTasks() {
+
   const errors = [];
   const allIds = [];
 
   SOUND_ORDER.forEach(soundKey => {
+
     const sound = speechTasks[soundKey];
 
     if (!sound) {
+
       errors.push(`${soundKey}: дыбыс дерегі жоқ`);
+
       return;
+
     }
 
     if (!Array.isArray(sound.stages)) {
+
       errors.push(`${soundKey}: кезеңдер массиві жоқ`);
+
       return;
+
     }
 
     if (sound.stages.length !== 4) {
+
       errors.push(`${soundKey}: 4 кезең болуы керек`);
+
     }
 
     sound.stages.forEach((stage, stageIndex) => {
+
       if (!Array.isArray(stage.tasks)) {
-        errors.push(`${soundKey}, ${stageIndex + 1}-кезең: тапсырмалар жоқ`);
+
+        errors.push(
+          `${soundKey}: ${stageIndex + 1}-кезеңде тапсырмалар жоқ`
+        );
+
         return;
+
       }
 
       if (stage.tasks.length !== 10) {
+
         errors.push(
-          `${soundKey}, ${stageIndex + 1}-кезең: ${stage.tasks.length} тапсырма`
+          `${soundKey}: ${stageIndex + 1}-кезеңде ${stage.tasks.length} тапсырма бар`
         );
+
       }
 
       stage.tasks.forEach(task => {
+
         if (!task.id) {
+
           errors.push(`${soundKey}: ID көрсетілмеген`);
+
         } else {
+
           allIds.push(task.id);
+
         }
 
         [
@@ -1101,41 +1770,103 @@ function validateSpeechTasks() {
           "example",
           "visual"
         ].forEach(field => {
-          if (!task[field]) {
-            errors.push(`${task.id || "ID жоқ"}: ${field} толтырылмаған`);
+
+          if (
+            !task[field] ||
+            String(task[field]).trim() === ""
+          ) {
+
+            errors.push(
+              `${task.id || "ID жоқ"}: ${field} толтырылмаған`
+            );
+
           }
+
         });
+
       });
+
+      if (stageIndex === 0) {
+
+        const articulationCount = stage.tasks.filter(task =>
+          String(task.category).toLowerCase()
+            .includes("артикуляция")
+        ).length;
+
+        const breathingCount = stage.tasks.filter(task =>
+          String(task.category).toLowerCase()
+            .includes("тыныс")
+        ).length;
+
+        if (articulationCount !== 5) {
+
+          errors.push(
+            `${soundKey}: артикуляция тапсырмасы ${articulationCount}, 5 болуы керек`
+          );
+
+        }
+
+        if (breathingCount !== 5) {
+
+          errors.push(
+            `${soundKey}: тыныс алу тапсырмасы ${breathingCount}, 5 болуы керек`
+          );
+
+        }
+
+      }
+
     });
+
   });
 
   const uniqueIds = new Set(allIds);
 
   if (uniqueIds.size !== allIds.length) {
+
     errors.push("Қайталанатын тапсырма ID-лері бар.");
+
   }
 
-  console.log("Жалпы тапсырма саны:", allIds.length);
+  console.log("========== БАҒДАРЛАМА ТЕКСЕРІСІ ==========");
 
-  if (errors.length) {
-    console.error("Тексеру нәтижесі:", errors);
+  console.log("Дыбыстар саны:", SOUND_ORDER.length);
+  console.log("Тапсырмалар саны:", allIds.length);
+  console.log("Бірегей ID саны:", uniqueIds.size);
+
+  if (errors.length === 0) {
+
+    console.log("Құрылымдық тексерістен қате табылған жоқ.");
+
   } else {
-    console.log("Барлық тапсырма құрылымы дұрыс.");
+
+    console.error("ҚАТЕЛЕР:", errors);
+
   }
 
-  return errors;
+  return {
+    totalTasks: allIds.length,
+    uniqueIds: uniqueIds.size,
+    errors
+  };
+
 }
 
 
-/* ---------- 25. САЙТТЫ ІСКЕ ҚОСУ ---------- */
+/* =====================================================
+   31. САЙТТЫ ІСКЕ ҚОСУ
+   ===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+
   if (typeof speechTasks === "undefined") {
+
     console.error(
       "speechTasks табылмады. data.js файлын тексеріңіз."
     );
 
     return;
+
   }
 
   renderSoundMenu();
@@ -1145,4 +1876,5 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   validateSpeechTasks();
+
 });
