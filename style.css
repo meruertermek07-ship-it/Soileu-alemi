@@ -1327,3 +1327,37 @@ button:not(.primary-button) {
     font-size: 17px;
   }
 }
+/* =================================
+   АУЫЗ ҚУЫСЫНЫҢ СЫЗБАСЫ
+   ================================= */
+
+.mouth-diagram {
+  margin: 20px auto;
+  padding: 15px;
+  max-width: 420px;
+  background: #f5f8ff;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.mouth-diagram svg {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  display: block;
+  margin: auto;
+}
+
+.diagram-caption {
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.diagram-caption strong {
+  color: #5146a5;
+}
+
+.diagram-caption p {
+  font-size: 13px;
+  color: #777;
+}
