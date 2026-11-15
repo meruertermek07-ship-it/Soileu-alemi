@@ -1,71 +1,52 @@
 <!DOCTYPE html>
 <html lang="kk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Сөйлеу әлеміне саяхат</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сөйлеу әлеміне саяхат</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
 <header>
-  <h1>✨ ДИСЛАЛИЯНЫ ТҮЗЕТУ БАҒДАРЛАМАСЫ ✨</h1>
-  <p>СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ</p>
+    <h1>ДИСЛАЛИЯНЫ ТҮЗЕТУ БАҒДАРЛАМАСЫ</h1>
+    <h2>🌈 СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ</h2>
+    <p>Дыбыстар әлеміне саяхатымызды бастаймыз!</p>
+    <button onclick="showSounds()">САЯХАТТЫ БАСТАУ 🚀</button>
 </header>
-
-<main class="container">
-
-<section id="home">
-  <div class="card">
-    <div style="font-size:80px">🐰</div>
-    <h2>Сиқырлы саяхатқа қош келдің!</h2>
-    <p>Дыбыстар әлемін бірге зерттейік!</p>
-    <button onclick="startJourney()">САЯХАТТЫ БАСТАУ</button>
-  </div>
+<main>
+    <section id="sounds" class="hidden">
+        <h2>ДЫБЫСТЫ ТАҢДА</h2>
+        <div id="soundList" class="grid"></div>
+    </section>
+<section id="stages" class="hidden">
+    <button onclick="backToSounds()">← Артқа</button>
+    <h2 id="selectedSound"></h2>
+    <div id="stageList" class="grid"></div>
 </section>
-
-<section id="soundsPage" class="hidden">
-  <h2>🌈 Дыбысты таңда</h2>
-  <div id="soundGrid" class="sound-grid"></div>
+<section id="tasks" class="hidden">
+    <button onclick="backToStages()">← Артқа</button>
+    <h2 id="stageTitle"></h2>
+    <div id="taskList" class="grid"></div>
 </section>
-
-<section id="stagesPage" class="hidden">
-  <h2 id="selectedTitle"></h2>
-  <div id="stageGrid" class="stage-grid"></div>
-  <button onclick="goBackToSounds()">← Артқа</button>
+<section id="taskDetail" class="hidden">
+    <button onclick="backToTasks()">← Артқа</button>
+    <h2 id="detailTitle"></h2>
+    <div id="detailContent"></div>
+    <button onclick="completeTask()">ОРЫНДАДЫМ ✓</button>
+    <p id="feedback"></p>
 </section>
-
-<section id="tasksPage" class="hidden">
-  <h2 id="taskTitle"></h2>
-
-  <div class="progress">
-    <div id="progressBar" class="progress-bar"></div>
-  </div>
-
-  <p id="progressText">Орындалды: 0/10 (0%)</p>
-
-  <div id="taskGrid" class="task-grid"></div>
-
-  <div class="card">
-    <h3>🎤 Дыбысты тыңдау</h3>
-    <button onclick="speak(selectedSound.letter)">Дыбысты тыңда</button>
-    <button onclick="startMicrophone()">Микрофон</button>
-    <button onclick="startCamera()">Камераны қосу</button>
-    <video id="camera" autoplay playsinline muted></video>
-  </div>
-
-  <button onclick="goBackToStages()">← Кезеңдерге оралу</button>
+<section id="results" class="hidden">
+    <h2>🏆 МЕНІҢ НӘТИЖЕМ</h2>
+    <p id="resultText"></p>
+    <button onclick="showDiploma()">ДИПЛОМ АЛУ</button>
 </section>
-
+<section id="diploma" class="hidden">
+    <h1>🏅 ДЫБЫСТАР ШЕБЕРІ</h1>
+    <p>Бұл диплом сөйлеу әлеміндегі тапсырмаларды орындағаны үшін беріледі!</p>
+    <p id="diplomaResult"></p>
+</section>
 </main>
-
-<footer>
-  <p>© СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ | Авторлық логопедиялық бағдарлама</p>
-</footer>
-
 <script src="data.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>
