@@ -1,860 +1,1059 @@
-// =====================================================
-// СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ
-// НЕГІЗГІ БАСҚАРУ ЖҮЙЕСІ
-// =====================================================
+/* ==========================================
+   СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ
+   НЕГІЗГІ БАСҚАРУ ЖҮЙЕСІ
+   ========================================== */
 
 
-// 1. ДЫБЫСТАР ТІЗІМІ
-
-const soundList = [
-    { key: "R", symbol: "Р", title: "Р дыбысы", icon: "🚀" },
-    { key: "L", symbol: "Л", title: "Л дыбысы", icon: "🌸" },
-    { key: "G", symbol: "Г", title: "Г дыбысы", icon: "🎈" },
-    { key: "GH", symbol: "Ғ", title: "Ғ дыбысы", icon: "🌳" },
-    { key: "K", symbol: "К", title: "К дыбысы", icon: "🔑" },
-    { key: "Q", symbol: "Қ", title: "Қ дыбысы", icon: "🏰" },
-    { key: "SH", symbol: "Ш", title: "Ш дыбысы", icon: "🦋" },
-    { key: "ZH", symbol: "Ж", title: "Ж дыбысы", icon: "☀️" },
-    { key: "Z", symbol: "З", title: "З дыбысы", icon: "🐝" },
-    { key: "S", symbol: "С", title: "С дыбысы", icon: "⭐" }
-];
-
-
-// 2. КЕЗЕҢДЕР
-
-const defaultStages = [
-    {
-        title: "Дайындық кезеңі",
-        description: "Артикуляциялық жаттығулар мен тыныс алуды дамыту",
-        icon: "👄"
-    },
-    {
-        title: "Дыбысты қою кезеңі",
-        description: "Дұрыс дыбыстауды қалыптастыру",
-        icon: "🎯"
-    },
-    {
-        title: "Автоматтандыру кезеңі",
-        description: "Дыбысты буында, сөзде және сөйлемде бекіту",
-        icon: "🗣️"
-    },
-    {
-        title: "Дифференциация кезеңі",
-        description: "Ұқсас дыбыстарды ажырату",
-        icon: "🧠"
-    }
-];
-
-
-// 3. ЖҰМЫС ЖАҒДАЙЫ
+/* ==========================================
+   1. НЕГІЗГІ АЙНЫМАЛЫЛАР
+   ========================================== */
 
 let currentSound = null;
-let currentStageIndex = 0;
-let currentTaskIndex = 0;
-let currentTasks = [];
-
-let completedTasks = [];
-
-try {
-    const saved = JSON.parse(
-        localStorage.getItem("soileuCompletedTasks") || "[]"
-    );
-
-    if (Array.isArray(saved)) {
-        completedTasks = saved.map(String);
-    }
-} catch (error) {
-    completedTasks = [];
-}
-
-
-// 4. HTML ЭЛЕМЕНТТЕРІ
-
-function el(id) {
-    return document.getElementById(id);
-}
-
-function setText(id, value) {
-    const element = el(id);
-
-    if (element) {
-        element.textContent =
-            value === undefined || value === null
-                ? ""
-                : String(value);
-    }
-}
-
-
-// 5. DATA.JS ТЕКСЕРУ
-
-function checkData() {
-    if (typeof speechTasks === "undefined") {
-        console.error("ҚАТЕ: speechTasks табылмады. data.js файлын тексер!");
-        return false;
-    }
-
-    return true;
-}
-
-
-// 6. ДЫБЫС ДЕРЕГІН АЛУ
-
-function getSoundData(soundKey) {
-    if (!checkData()) return null;
-
-    return speechTasks[soundKey] || null;
-}
-
-
-// 7. КЕЗЕҢДЕРДІ АЛУ
-
-function getStages(soundKey) {
-    const soundData = getSoundData(soundKey);
-
-    if (!soundData || !soundData.stages) {
-        return [];
-    }
-
-    if (Array.isArray(soundData.stages)) {
-        return soundData.stages;
-    }
-
-    return Object.values(soundData.stages);
-}
-
-
-// 8. КЕЗЕҢНІҢ ТАПСЫРМАЛАРЫН АЛУ
-
-function getTasksFromStage(stage) {
-    if (!stage) return [];
-
-    // Кезең тікелей массив болса
-    if (Array.isArray(stage)) {
-        return stage;
-    }
-
-    // Кезең ішінде tasks массиві болса
-    if (Array.isArray(stage.tasks)) {
-        return stage.tasks;
-    }
-
-    return [];
-}
-
-
-// 9. БАРЛЫҚ ТАПСЫРМАЛАРДЫ АЛУ
-
-function getAllTasksForSound(soundKey) {
-    const stages = getStages(soundKey);
-
-    let result = [];
-
-    stages.forEach(stage => {
-        result = result.concat(getTasksFromStage(stage));
-    });
-
-    return result;
-}
-
-
-// 10. БЕТТЕРДІ АУЫСТЫРУ
-
-function showPage(pageId) {
-    const pages = [
-        "homePage",
-        "soundSection",
-        "stagePage",
-        "taskPage",
-        "diplomaPage"
-    ];
-
-    pages.forEach(id => {
-        const page = el(id);
-
-        if (page) {
-            page.classList.add("hidden");
-        }
-    });
-
-    const selected = el(pageId);
-
-    if (selected) {
-        selected.classList.remove("hidden");
-    }
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-
-// 11. САЯХАТТЫ БАСТАУ
-
-function startJourney() {
-    if (!checkData()) {
-        alert("data.js файлы жүктелмеді. Файлдардың ретін тексер!");
-        return;
-    }
-
-    showPage("soundSection");
-    createSoundMenu();
-}
-
-
-// 12. ДЫБЫСТАР МӘЗІРІ
-
-function createSoundMenu() {
-    const menu = el("soundMenu");
-
-    if (!menu) {
-        console.error("soundMenu элементі табылмады!");
-        return;
-    }
-
-    menu.innerHTML = "";
-
-    soundList.forEach(sound => {
-        const data = getSoundData(sound.key);
-
-        if (!data) {
-            console.error("Дерек табылмады:", sound.key);
-            return;
-        }
-
-        const allTasks = getAllTasksForSound(sound.key);
-
-        const done = allTasks.filter(task =>
-            completedTasks.includes(String(task.id))
-        ).length;
-
-        const button = document.createElement("button");
-
-        button.type = "button";
-        button.className = "sound-button";
-
-        button.innerHTML = `
-            <span class="sound-icon">${sound.icon}</span>
-            <span class="sound-symbol">${sound.symbol}</span>
-            <span class="sound-title">${sound.title}</span>
-            <span class="sound-progress">${done}/${allTasks.length} тапсырма</span>
-        `;
-
-        button.addEventListener("click", () => {
-            selectSound(sound.key);
-        });
-
-        menu.appendChild(button);
-    });
-}
-
-
-// 13. ДЫБЫСТЫ ТАҢДАУ
-
-function selectSound(soundKey) {
-    const data = getSoundData(soundKey);
-
-    if (!data) {
-        alert("Бұл дыбыстың деректері табылмады!");
-        return;
-    }
-
-    currentSound = soundKey;
-    currentStageIndex = 0;
-    currentTaskIndex = 0;
-
-    showPage("stagePage");
-    createStageMenu();
-}
-
-
-// 14. АҒЫМДАҒЫ КЕЗЕҢДІ АЛУ
-
-function getCurrentStage() {
-    const stages = getStages(currentSound);
-
-    return stages[currentStageIndex] || null;
-}
-
-
-// 15. КЕЗЕҢ ТАПСЫРМАЛАРЫН АЛУ
-
-function getStageTasks(stageIndex) {
-    const stages = getStages(currentSound);
-
-    return getTasksFromStage(stages[stageIndex]);
-}
-
-
-// 16. КЕЗЕҢ АТАУЫН АЛУ
-
-function getStageTitle(stage, index) {
-    if (stage && stage.title) return stage.title;
-    if (stage && stage.name) return stage.name;
-
-    return defaultStages[index]?.title || `Кезең ${index + 1}`;
-}
-
-
-// 17. КЕЗЕҢ СИПАТТАМАСЫН АЛУ
-
-function getStageDescription(stage, index) {
-    if (stage && stage.description) return stage.description;
-
-    return defaultStages[index]?.description || "";
-}
-
-
-// 18. КЕЗЕҢДЕР МӘЗІРІН ҚҰРУ
-
-function createStageMenu() {
-    const menu = el("stageMenu");
-
-    if (!menu) {
-        console.error("stageMenu элементі табылмады!");
-        return;
-    }
-
-    menu.innerHTML = "";
-
-    const stages = getStages(currentSound);
-
-    const sound = soundList.find(item =>
-        item.key === currentSound
-    );
-
-    setText(
-        "soundTitle",
-        sound ? sound.title : "Дыбыс әлемі"
-    );
-
-    stages.forEach((stage, index) => {
-        const tasks = getTasksFromStage(stage);
-
-        const done = tasks.filter(task =>
-            completedTasks.includes(String(task.id))
-        ).length;
-
-        const percent = tasks.length
-            ? Math.round(done / tasks.length * 100)
-            : 0;
-
-        const button = document.createElement("button");
-
-        button.type = "button";
-        button.className = "stage-button";
-
-        button.innerHTML = `
-            <span class="stage-icon">
-                ${defaultStages[index]?.icon || "🌟"}
-            </span>
-
-            <strong>${getStageTitle(stage, index)}</strong>
-
-            <span class="stage-description">
-                ${getStageDescription(stage, index)}
-            </span>
-
-            <span class="stage-task-count">
-                ${tasks.length} тапсырма
-            </span>
-
-            <span class="stage-progress">
-                ${done}/${tasks.length} орындалды
-            </span>
-
-            <span class="stage-percent">
-                ${percent}% аяқталды
-            </span>
-        `;
-
-        button.addEventListener("click", () => {
-            selectStage(index);
-        });
-
-        menu.appendChild(button);
-    });
-}
-
-
-// 19. КЕЗЕҢДІ ТАҢДАУ
-
-function selectStage(stageIndex) {
-    currentStageIndex = Number(stageIndex);
-    currentTaskIndex = 0;
-
-    currentTasks = getStageTasks(currentStageIndex);
-
-    if (!currentTasks.length) {
-        alert("Бұл кезеңде тапсырмалар табылмады!");
-        return;
-    }
-
-    displayTask();
-}
-
-
-// 20. ТАПСЫРМАНЫ КӨРСЕТУ
-
-function displayTask() {
-    if (!currentTasks.length) return;
-
-    const task = currentTasks[currentTaskIndex];
-
-    if (!task) return;
-
-    showPage("taskPage");
-
-    const stage = getCurrentStage();
-
-    setText(
-        "stageTitle",
-        getStageTitle(stage, currentStageIndex)
-    );
-
-    setText(
-        "stageDescription",
-        getStageDescription(stage, currentStageIndex)
-    );
-
-    setText(
-        "taskNumber",
-        `Тапсырма ${currentTaskIndex + 1}`
-    );
-
-    setText(
-        "taskCounter",
-        `${currentTaskIndex + 1}/${currentTasks.length}`
-    );
-
-    setText("taskCategory", task.category);
-    setText("taskName", task.title);
-    setText("taskGoal", task.goal);
-    setText("taskInstruction", task.instruction);
-    setText("taskExample", task.example);
-    setText("taskVisual", task.visual);
-    setText("taskCheck", task.check);
-    setText("taskHint", task.help);
-
-    updateProgress();
-    updateNavigationButtons();
-
-    const completeButton = el("completeButton");
-
-    if (completeButton) {
-        const done = completedTasks.includes(String(task.id));
-
-        completeButton.disabled = done;
-
-        completeButton.textContent = done
-            ? "✓ Орындалды"
-            : "✓ Тапсырманы орындадым";
-    }
-
-    // Жаңа тапсырмаға өткенде құралдарды тоқтату
-    stopCamera();
-    stopMicrophone();
-
-    // Камера бөлімі бастапқыда жасырын болады
-    const cameraSection = el("cameraSection");
-
-    if (cameraSection) {
-        cameraSection.classList.add("hidden");
-    }
-}
-
-
-// 21. ПРОГРЕСТІ ЕСЕПТЕУ
-
-function updateProgress() {
-    const done = currentTasks.filter(task =>
-        completedTasks.includes(String(task.id))
-    ).length;
-
-    const percent = currentTasks.length
-        ? Math.round(done / currentTasks.length * 100)
-        : 0;
-
-    setText("progressText", `${percent}%`);
-
-    const bar = el("progressBar");
-
-    if (bar) {
-        bar.style.width = `${percent}%`;
-    }
-}
-
-
-// 22. ТАПСЫРМАНЫ ОРЫНДАЛДЫ ДЕП САҚТАУ
-
-function completeTask() {
-    const task = currentTasks[currentTaskIndex];
-
-    if (!task) return;
-
-    const id = String(task.id);
-
-    if (!completedTasks.includes(id)) {
-        completedTasks.push(id);
-
-        localStorage.setItem(
-            "soileuCompletedTasks",
-            JSON.stringify(completedTasks)
-        );
-    }
-
-    updateProgress();
-
-    const button = el("completeButton");
-
-    if (button) {
-        button.disabled = true;
-        button.textContent = "✓ Орындалды";
-    }
-
-    setTimeout(() => {
-        if (currentTaskIndex < currentTasks.length - 1) {
-            currentTaskIndex++;
-            displayTask();
-        } else {
-            alert("Жарайсың! Бұл кезеңнің барлық тапсырмасы аяқталды!");
-            showPage("stagePage");
-            createStageMenu();
-        }
-    }, 400);
-}
-
-
-// 23. АЛДЫҢҒЫ ТАПСЫРМА
-
-function previousTask() {
-    if (currentTaskIndex > 0) {
-        currentTaskIndex--;
-        displayTask();
-    }
-}
-
-
-// 24. КЕЛЕСІ ТАПСЫРМА
-
-function nextTask() {
-    if (currentTaskIndex < currentTasks.length - 1) {
-        currentTaskIndex++;
-        displayTask();
-    }
-}
-
-
-// 25. НАВИГАЦИЯ БАТЫРМАЛАРЫ
-
-function updateNavigationButtons() {
-    const previous = el("previousButton");
-    const next = el("nextButton");
-
-    if (previous) {
-        previous.disabled = currentTaskIndex === 0;
-    }
-
-    if (next) {
-        next.disabled =
-            currentTaskIndex === currentTasks.length - 1;
-    }
-}
-
-
-// 26. КЕЗЕҢДЕРГЕ ҚАЙТУ
-
-function goStages() {
-    stopCamera();
-    stopMicrophone();
-
-    showPage("stagePage");
-    createStageMenu();
-}
-
-
-// 27. БАСТЫ БЕТКЕ ҚАЙТУ
-
-function goHome() {
-    stopCamera();
-    stopMicrophone();
-
-    currentSound = null;
-    currentTasks = [];
-
-    showPage("homePage");
-}
-
-
-// 28. КАМЕРАНЫ ҚОСУ
+let currentStage = 0;
+let currentTask = 0;
 
 let cameraStream = null;
-
-async function startCamera() {
-    const video = el("cameraVideo");
-    const section = el("cameraSection");
-
-    if (!navigator.mediaDevices?.getUserMedia) {
-        alert("Камера бұл браузерде қолжетімсіз.");
-        return;
-    }
-
-    try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: "user"
-            },
-            audio: false
-        });
-
-        if (video) {
-            video.srcObject = cameraStream;
-            video.style.transform = "scaleX(-1)";
-            await video.play();
-        }
-
-        if (section) {
-            section.classList.remove("hidden");
-        }
-
-    } catch (error) {
-        console.error("Камера қатесі:", error);
-        alert("Камераға рұқсат беріп, қайта көріңіз.");
-    }
-}
-
-
-// 29. КАМЕРАНЫ ӨШІРУ
-
-function stopCamera() {
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
-    }
-
-    const video = el("cameraVideo");
-
-    if (video) {
-        video.srcObject = null;
-    }
-}
-
-
-// 30. МИКРОФОНДЫ ҚОСУ
-
 let microphoneStream = null;
 let audioContext = null;
 let microphoneAnimation = null;
 
-async function startMicrophone() {
-    if (!navigator.mediaDevices?.getUserMedia) {
-        alert("Микрофон бұл браузерде қолжетімсіз.");
-        return;
-    }
+let selectedScores = JSON.parse(
+  localStorage.getItem("speechScores") || "{}"
+);
 
-    try {
-        microphoneStream = await navigator.mediaDevices.getUserMedia({
-            audio: true
-        });
+let completedTasks = JSON.parse(
+  localStorage.getItem("completedTasks") || "[]"
+);
 
-        audioContext = new (
-            window.AudioContext ||
-            window.webkitAudioContext
-        )();
+const soundLabels = {
+  R: "Р",
+  L: "Л",
+  G: "Г",
+  GH: "Ғ",
+  K: "К",
+  Q: "Қ",
+  SH: "Ш",
+  ZH: "Ж",
+  Z: "З",
+  S: "С"
+};
 
-        await audioContext.resume();
 
-        const source =
-            audioContext.createMediaStreamSource(microphoneStream);
+/* ==========================================
+   2. БЕТТЕРДІ БАСҚАРУ
+   ========================================== */
 
-        const analyser = audioContext.createAnalyser();
+function showPage(pageId) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.add("hidden");
+  });
 
-        analyser.fftSize = 256;
+  const page = document.getElementById(pageId);
 
-        source.connect(analyser);
+  if (page) {
+    page.classList.remove("hidden");
+  }
 
-        const data = new Uint8Array(analyser.frequencyBinCount);
+  stopCamera();
+  stopMicrophone();
+  stopSpeechSample();
+}
 
-        function measure() {
-            if (!analyser) return;
+function startJourney() {
+  showPage("soundPage");
+  renderSoundMenu();
+}
 
-            analyser.getByteFrequencyData(data);
+function openRelaxation() {
+  showPage("relaxationPage");
+  renderRelaxationMenu();
+}
 
-            let sum = 0;
+function openMotorSkills() {
+  showPage("motorPage");
+  renderMotorMenu();
+}
 
-            for (let i = 0; i < data.length; i++) {
-                sum += data[i];
-            }
-
-            const average = sum / data.length;
-
-            if (average < 10) {
-                setText("microphoneStatus", "🔈 Дыбыс деңгейі: төмен");
-            } else if (average < 35) {
-                setText("microphoneStatus", "🔉 Дыбыс деңгейі: орташа");
-            } else {
-                setText("microphoneStatus", "🔊 Дыбыс деңгейі: жоғары");
-            }
-
-            microphoneAnimation =
-                requestAnimationFrame(measure);
-        }
-
-        measure();
-
-    } catch (error) {
-        console.error("Микрофон қатесі:", error);
-        alert("Микрофонға рұқсат беріңіз.");
-    }
+function openAssessment() {
+  showPage("assessmentPage");
+  renderAssessment();
 }
 
 
-// 31. МИКРОФОНДЫ ӨШІРУ
+/* ==========================================
+   3. ДЫБЫСТАР МӘЗІРІ
+   ========================================== */
+
+function renderSoundMenu() {
+  const menu = document.getElementById("soundMenu");
+
+  if (!menu) return;
+
+  menu.innerHTML = "";
+
+  SOUND_ORDER.forEach(key => {
+    const soundData = speechTasks[key];
+
+    if (!soundData) return;
+
+    const button = document.createElement("button");
+
+    button.className = "sound-card";
+
+    button.innerHTML = `
+      <span class="sound-letter">
+        ${soundLabels[key]}
+      </span>
+      <span class="sound-name">
+        ${soundData.title || soundLabels[key] + " дыбысы"}
+      </span>
+      <span class="sound-status">
+        ${getSoundProgress(key)}%
+      </span>
+    `;
+
+    button.onclick = () => selectSound(key);
+
+    menu.appendChild(button);
+  });
+}
+
+
+/* ==========================================
+   4. ДЫБЫСТЫ ТАҢДАУ
+   ========================================== */
+
+function selectSound(soundKey) {
+  if (!speechTasks[soundKey]) return;
+
+  currentSound = soundKey;
+  currentStage = 0;
+  currentTask = 0;
+
+  showPage("taskPage");
+
+  const title = document.getElementById("soundTitle");
+
+  if (title) {
+    title.textContent =
+      soundLabels[soundKey] + " дыбысы";
+  }
+
+  renderStageMenu();
+  renderTask();
+}
+
+
+/* ==========================================
+   5. КЕЗЕҢДЕР МӘЗІРІ
+   ========================================== */
+
+function renderStageMenu() {
+  const menu = document.getElementById("stageMenu");
+
+  if (!menu) return;
+
+  menu.innerHTML = "";
+
+  const stages = speechTasks[currentSound].stages;
+
+  stages.forEach((stage, index) => {
+    const button = document.createElement("button");
+
+    button.className =
+      "stage-button" +
+      (index === currentStage ? " active" : "");
+
+    button.innerHTML = `
+      <span>${index + 1}-кезең</span>
+      <small>${stage.name}</small>
+      <strong>${getStageProgress(currentSound, index)}%</strong>
+    `;
+
+    button.onclick = () => {
+      currentStage = index;
+      currentTask = 0;
+
+      stopCamera();
+      stopMicrophone();
+      renderStageMenu();
+      renderTask();
+    };
+
+    menu.appendChild(button);
+  });
+}
+
+
+/* ==========================================
+   6. ТАПСЫРМАНЫ КӨРСЕТУ
+   ========================================== */
+
+function renderTask() {
+  if (!currentSound) return;
+
+  const stage =
+    speechTasks[currentSound].stages[currentStage];
+
+  if (!stage || !stage.tasks[currentTask]) return;
+
+  const task = stage.tasks[currentTask];
+
+  stopCamera();
+  stopMicrophone();
+  stopSpeechSample();
+
+  setText("stageTitle", stage.name);
+
+  setText(
+    "taskCounter",
+    `${currentTask + 1} / ${stage.tasks.length}`
+  );
+
+  setText("taskCategory", task.category);
+  setText("taskName", task.title);
+  setText("taskGoal", task.goal);
+  setText("taskInstruction", task.instruction);
+  setText("taskExample", task.example);
+  setText("taskVisual", task.visual);
+  setText("taskHint", task.help || "Тапсырманы асықпай орында.");
+
+  const progress =
+    ((currentTask + 1) / stage.tasks.length) * 100;
+
+  setText("progressText", Math.round(progress) + "%");
+
+  const progressBar =
+    document.getElementById("progressBar");
+
+  if (progressBar) {
+    progressBar.style.width = progress + "%";
+  }
+
+  showTaskSections(task);
+
+  const scoreKey = getTaskKey(task.id);
+
+  const previousScore = selectedScores[scoreKey];
+
+  document.querySelectorAll("[data-score]").forEach(button => {
+    button.classList.toggle(
+      "selected",
+      Number(button.dataset.score) === previousScore
+    );
+  });
+
+  setText(
+    "taskScoreMessage",
+    previousScore !== undefined
+      ? "Бұл тапсырманың бағасы сақталған."
+      : "Тапсырманы орындаған соң баға таңда."
+  );
+
+  renderStageMenu();
+}
+
+
+/* ==========================================
+   7. ҚОСЫМША ЭЛЕМЕНТТЕРДІ БАСҚАРУ
+   ========================================== */
+
+function setText(id, value) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.textContent = value ?? "";
+  }
+}
+
+function showSection(id, visible) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.style.display = visible ? "block" : "none";
+  }
+}
+
+function showTaskSections(task) {
+  const articulation =
+    task.category?.toLowerCase().includes("артикуляция") ||
+    task.articulation;
+
+  const breathing =
+    task.breathing ||
+    task.category?.toLowerCase().includes("тыныс");
+
+  const microphone =
+    task.microphone ||
+    breathing;
+
+  showSection("articulationSection", Boolean(articulation));
+  showSection("cameraSection", Boolean(task.camera || articulation));
+
+  showSection("microphoneSection", Boolean(microphone));
+  showSection("breathingSection", Boolean(breathing));
+
+  showSection(
+    "audioSection",
+    Boolean(task.sample)
+  );
+
+  setText(
+    "articulationDescription",
+    task.articulation || task.help || ""
+  );
+
+  setText(
+    "speechSample",
+    task.sample || "Бұл тапсырмаға аудио үлгі енгізілмеген."
+  );
+
+  setText(
+    "microphoneMessage",
+    breathing
+      ? "Микрофонды қосып, ауа ағынын емес, дыбыс деңгейін бақыла."
+      : "Микрофон арқылы дыбыс деңгейін бақылауға болады."
+  );
+
+  setText(
+    "blowMessage",
+    "Микрофонды қосып, мақтаны үрлеу жаттығуын орында."
+  );
+
+  const cotton = document.getElementById("cotton");
+
+  if (cotton) {
+    cotton.style.transform = "translateX(0)";
+  }
+
+  setText("blowProgress", "0%");
+}
+
+
+/* ==========================================
+   8. БҰРЫНҒЫ ЖӘНЕ КЕЛЕСІ ТАПСЫРМА
+   ========================================== */
+
+function previousTask() {
+  if (currentTask > 0) {
+    currentTask--;
+    renderTask();
+    return;
+  }
+
+  if (currentStage > 0) {
+    currentStage--;
+    currentTask = 9;
+    renderTask();
+  }
+}
+
+function nextTask() {
+  const tasks =
+    speechTasks[currentSound].stages[currentStage].tasks;
+
+  if (currentTask < tasks.length - 1) {
+    currentTask++;
+    renderTask();
+    return;
+  }
+
+  if (currentStage < 3) {
+    currentStage++;
+    currentTask = 0;
+    renderTask();
+    return;
+  }
+
+  alert("Бұл дыбыстың барлық кезеңі аяқталды!");
+  showPage("soundPage");
+  renderSoundMenu();
+}
+
+function completeTask() {
+  const task = getCurrentTask();
+
+  if (!task) return;
+
+  const key = getTaskKey(task.id);
+
+  if (!completedTasks.includes(key)) {
+    completedTasks.push(key);
+
+    localStorage.setItem(
+      "completedTasks",
+      JSON.stringify(completedTasks)
+    );
+  }
+
+  nextTask();
+}
+
+function getCurrentTask() {
+  if (!currentSound) return null;
+
+  return speechTasks[currentSound]
+    ?.stages[currentStage]
+    ?.tasks[currentTask];
+}
+
+
+/* ==========================================
+   9. БАҒАЛАУ ЖҮЙЕСІ
+   ========================================== */
+
+function getTaskKey(taskId) {
+  return currentSound + "-" + taskId;
+}
+
+function setTaskScore(score) {
+  const task = getCurrentTask();
+
+  if (!task) return;
+
+  const key = getTaskKey(task.id);
+
+  selectedScores[key] = score;
+
+  localStorage.setItem(
+    "speechScores",
+    JSON.stringify(selectedScores)
+  );
+
+  setText(
+    "taskScoreMessage",
+    getScoreDescription(score)
+  );
+
+  document.querySelectorAll("[data-score]").forEach(button => {
+    button.classList.toggle(
+      "selected",
+      Number(button.dataset.score) === score
+    );
+  });
+}
+
+function getScoreDescription(score) {
+  const descriptions = {
+    3: "3 балл — тапсырманы өз бетінше орындады.",
+    2: "2 балл — аздаған көмекпен орындады.",
+    1: "1 балл — маманның көмегімен орындады.",
+    0: "0 балл — тапсырманы қайталау қажет."
+  };
+
+  return descriptions[score] || "";
+}
+
+
+/* ==========================================
+   10. ПРОГРЕСТІ ЕСЕПТЕУ
+   ========================================== */
+
+function getStageProgress(soundKey, stageIndex) {
+  const tasks =
+    speechTasks[soundKey].stages[stageIndex].tasks;
+
+  const completed = tasks.filter(task =>
+    completedTasks.includes(
+      soundKey + "-" + task.id
+    )
+  ).length;
+
+  return Math.round(
+    completed / tasks.length * 100
+  );
+}
+
+function getSoundProgress(soundKey) {
+  let completed = 0;
+  let total = 0;
+
+  speechTasks[soundKey].stages.forEach(stage => {
+    total += stage.tasks.length;
+
+    stage.tasks.forEach(task => {
+      if (
+        completedTasks.includes(
+          soundKey + "-" + task.id
+        )
+      ) {
+        completed++;
+      }
+    });
+  });
+
+  return Math.round(completed / total * 100);
+}
+
+function getTotalProgress() {
+  let total = 0;
+
+  SOUND_ORDER.forEach(key => {
+    total += getSoundProgress(key);
+  });
+
+  return Math.round(total / SOUND_ORDER.length);
+}
+
+
+/* ==========================================
+   11. КАМЕРАНЫ ҚОСУ
+   ========================================== */
+
+async function startCamera() {
+  const video = document.getElementById("cameraVideo");
+
+  if (!video) return;
+
+  try {
+    stopCamera();
+
+    cameraStream =
+      await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user"
+        },
+        audio: false
+      });
+
+    video.srcObject = cameraStream;
+
+    await video.play();
+
+  } catch (error) {
+    console.error("Камера қатесі:", error);
+
+    alert(
+      "Камера қосылмады. Браузердің камераға рұқсатын тексер."
+    );
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => {
+      track.stop();
+    });
+
+    cameraStream = null;
+  }
+
+  const video = document.getElementById("cameraVideo");
+
+  if (video) {
+    video.srcObject = null;
+  }
+}
+
+
+/* ==========================================
+   12. МИКРОФОН ЖӘНЕ ДЫБЫС ДЕҢГЕЙІ
+   ========================================== */
+
+async function startMicrophone() {
+  try {
+    stopMicrophone();
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert("Бұл браузер микрофонды қолдамайды.");
+      return;
+    }
+
+    microphoneStream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false
+      });
+
+    audioContext = new (
+      window.AudioContext ||
+      window.webkitAudioContext
+    )();
+
+    const source =
+      audioContext.createMediaStreamSource(
+        microphoneStream
+      );
+
+    const analyser = audioContext.createAnalyser();
+
+    analyser.fftSize = 256;
+
+    source.connect(analyser);
+
+    const data = new Uint8Array(
+      analyser.frequencyBinCount
+    );
+
+    function updateMicrophone() {
+      analyser.getByteTimeDomainData(data);
+
+      let sum = 0;
+
+      for (let i = 0; i < data.length; i++) {
+        const value = (data[i] - 128) / 128;
+        sum += value * value;
+      }
+
+      const volume = Math.sqrt(sum / data.length);
+
+      const level = Math.min(
+        100,
+        Math.round(volume * 350)
+      );
+
+      updateVolumeDisplay(level);
+      updateCotton(level);
+
+      microphoneAnimation =
+        requestAnimationFrame(updateMicrophone);
+    }
+
+    updateMicrophone();
+
+    setText(
+      "microphoneStatus",
+      "Микрофон қосылды"
+    );
+
+  } catch (error) {
+    console.error("Микрофон қатесі:", error);
+
+    alert(
+      "Микрофонға рұқсат берілмеді. Браузер баптауларын тексер."
+    );
+  }
+}
+
+function updateVolumeDisplay(level) {
+  const bar = document.getElementById("volumeBar");
+
+  if (bar) {
+    bar.style.width = level + "%";
+  }
+
+  let message = "Дыбыс жоқ";
+
+  if (level > 5 && level < 25) {
+    message = "Дыбыс деңгейі төмен";
+  } else if (level >= 25 && level < 60) {
+    message = "Дыбыс деңгейі орташа";
+  } else if (level >= 60) {
+    message = "Дыбыс деңгейі жоғары";
+  }
+
+  setText("microphoneMessage", message);
+}
+
+
+/* ==========================================
+   13. ТЫНЫС ЖАТТЫҒУЫНЫҢ АНИМАЦИЯСЫ
+   ========================================== */
+
+function updateCotton(level) {
+  const cotton = document.getElementById("cotton");
+
+  if (!cotton) return;
+
+  const movement = Math.min(
+    250,
+    level * 2.5
+  );
+
+  cotton.style.transform =
+    `translateX(${movement}px)`;
+
+  setText(
+    "blowProgress",
+    Math.round(movement / 250 * 100) + "%"
+  );
+}
+
+
+/* ==========================================
+   14. МИКРОФОНДЫ ӨШІРУ
+   ========================================== */
 
 function stopMicrophone() {
-    if (microphoneAnimation) {
-        cancelAnimationFrame(microphoneAnimation);
-        microphoneAnimation = null;
-    }
+  if (microphoneAnimation) {
+    cancelAnimationFrame(microphoneAnimation);
+    microphoneAnimation = null;
+  }
 
-    if (microphoneStream) {
-        microphoneStream.getTracks().forEach(track => track.stop());
-        microphoneStream = null;
-    }
+  if (microphoneStream) {
+    microphoneStream.getTracks().forEach(track => {
+      track.stop();
+    });
 
-    if (audioContext) {
-        audioContext.close();
-        audioContext = null;
-    }
+    microphoneStream = null;
+  }
 
-    setText("microphoneStatus", "Микрофон өшірулі");
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
+  }
+
+  setText("microphoneStatus", "Микрофон өшірулі");
+
+  const bar = document.getElementById("volumeBar");
+
+  if (bar) {
+    bar.style.width = "0%";
+  }
+
+  const cotton = document.getElementById("cotton");
+
+  if (cotton) {
+    cotton.style.transform = "translateX(0)";
+  }
+
+  setText("blowProgress", "0%");
 }
 
 
-// 32. ЖАЛПЫ ПРОГРЕСТІ ЕСЕПТЕУ
+/* ==========================================
+   15. ДЫБЫС ҮЛГІСІН ОҚУ
+   ========================================== */
 
-function checkAllProgress() {
-    let total = 0;
-    let done = 0;
+function playSpeechSample() {
+  const task = getCurrentTask();
 
-    soundList.forEach(sound => {
-        const tasks = getAllTasksForSound(sound.key);
+  if (!task || !task.sample) {
+    alert("Бұл тапсырмада дыбыс үлгісі жоқ.");
+    return;
+  }
 
-        total += tasks.length;
+  if (!("speechSynthesis" in window)) {
+    alert("Бұл браузер мәтінді дыбыстауды қолдамайды.");
+    return;
+  }
 
-        done += tasks.filter(task =>
-            completedTasks.includes(String(task.id))
-        ).length;
-    });
+  stopSpeechSample();
 
-    return {
-        total,
-        done,
-        percent: total
-            ? Math.round(done / total * 100)
-            : 0
+  const utterance =
+    new SpeechSynthesisUtterance(task.sample);
+
+  utterance.lang = "kk-KZ";
+  utterance.rate = 0.8;
+  utterance.pitch = 1;
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeechSample() {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+
+/* ==========================================
+   16. СЕРГІТУ СӘТІ
+   ========================================== */
+
+const relaxationActivities = [
+  {
+    title: "Күнге созыл",
+    visual: "☀️",
+    instruction: "Қолдарыңды жоғары көтеріп, күнге созылғандай керіл."
+  },
+  {
+    title: "Көбелек",
+    visual: "🦋",
+    instruction: "Қолдарыңды көбелектің қанатындай баяу қозға."
+  },
+  {
+    title: "Ағаш",
+    visual: "🌳",
+    instruction: "Тік тұрып, денеңді оңға және солға ақырын бұр."
+  },
+  {
+    title: "Жаңбыр",
+    visual: "🌧️",
+    instruction: "Саусақтарыңмен үстелді жеңіл тықылдат."
+  },
+  {
+    title: "Құстар",
+    visual: "🐦",
+    instruction: "Қолдарыңды екі жаққа жайып, құс сияқты қимылда."
+  }
+];
+
+let relaxationIndex = 0;
+
+function renderRelaxationMenu() {
+  const menu = document.getElementById("relaxationMenu");
+
+  if (!menu) return;
+
+  menu.innerHTML = "";
+
+  relaxationActivities.forEach((activity, index) => {
+    const button = document.createElement("button");
+
+    button.className = "activity-card";
+
+    button.textContent =
+      activity.visual + " " + activity.title;
+
+    button.onclick = () => {
+      relaxationIndex = index;
+      startRelaxationGame();
     };
+
+    menu.appendChild(button);
+  });
+}
+
+function startRelaxationGame() {
+  const activity =
+    relaxationActivities[relaxationIndex];
+
+  showSection("relaxationGame", true);
+
+  setText("relaxationTitle", activity.title);
+  setText("relaxationVisual", activity.visual);
+  setText("relaxationInstruction", activity.instruction);
+}
+
+function nextRelaxationActivity() {
+  relaxationIndex++;
+
+  if (relaxationIndex >= relaxationActivities.length) {
+    relaxationIndex = 0;
+  }
+
+  startRelaxationGame();
 }
 
 
-// 33. ДИПЛОМДЫ КӨРСЕТУ
+/* ==========================================
+   17. ҰСАҚ МОТОРИКА
+   ========================================== */
 
-function showDiploma() {
-    const progress = checkAllProgress();
+const motorActivities = [
+  {
+    title: "Саусақ жаттығуы",
+    visual: "🖐️",
+    instruction: "Әр саусағыңды бас бармақпен кезекпен түйістір."
+  },
+  {
+    title: "Моншақ тізу",
+    visual: "📿",
+    instruction: "Моншақтарды түсіне қарай ретімен орналастыр."
+  },
+  {
+    title: "Суретті құрастыр",
+    visual: "🧩",
+    instruction: "Бөлшектерді біріктіріп, суретті құрастыр."
+  },
+  {
+    title: "Оң және сол",
+    visual: "🤚",
+    instruction: "Оң қолыңмен және сол қолыңмен кезекпен қимыл жаса."
+  },
+  {
+    title: "Саусақпен сана",
+    visual: "🔢",
+    instruction: "Саусақтарыңды пайдаланып, бірден беске дейін сана."
+  }
+];
 
-    if (progress.total !== 400 || progress.done < 400) {
-        alert(
-            `Диплом алу үшін барлық тапсырманы аяқта!\nОрындалғаны: ${progress.done}/${progress.total}`
-        );
+let motorIndex = 0;
 
-        return;
-    }
+function renderMotorMenu() {
+  const menu = document.getElementById("motorMenu");
 
-    showPage("diplomaPage");
+  if (!menu) return;
 
-    const diploma = el("diplomaPage");
+  menu.innerHTML = "";
 
-    if (!diploma) return;
+  motorActivities.forEach((activity, index) => {
+    const button = document.createElement("button");
 
-    diploma.innerHTML = `
-        <div class="diploma-card">
+    button.className = "activity-card";
 
-            <div class="diploma-icon">🏆</div>
+    button.textContent =
+      activity.visual + " " + activity.title;
 
-            <h1>ҚҰТТЫҚТАЙМЫЗ!</h1>
+    button.onclick = () => {
+      motorIndex = index;
+      startMotorGame();
+    };
 
-            <h2>ДЫБЫСТАР ШЕБЕРІ</h2>
+    menu.appendChild(button);
+  });
+}
 
-            <p>
-                Сен «Сөйлеу әлеміне саяхат»
-                бағдарламасындағы 400 тапсырманы
-                сәтті аяқтадың!
-            </p>
+function startMotorGame() {
+  const activity = motorActivities[motorIndex];
 
-            <div class="diploma-stars">
-                ⭐ ⭐ ⭐ ⭐ ⭐
-            </div>
+  showSection("motorGame", true);
 
-            <h3>Жарайсың!</h3>
+  setText("motorTitle", activity.title);
+  setText("motorVisual", activity.visual);
+  setText("motorInstruction", activity.instruction);
+  setText("motorResult", "");
+}
 
-            <button onclick="goHome()">
-                Басты бетке оралу
-            </button>
+function checkMotorGame() {
+  setText(
+    "motorResult",
+    "Жарайсың! Жаттығуды орындадың."
+  );
+}
 
-        </div>
-    `;
+function nextMotorGame() {
+  motorIndex++;
+
+  if (motorIndex >= motorActivities.length) {
+    motorIndex = 0;
+  }
+
+  startMotorGame();
 }
 
 
-// 34. БАРЛЫҚ ФУНКЦИЯЛАРДЫ HTML-ГЕ ҚОСУ
+/* ==========================================
+   18. БАҒАЛАУ БӨЛІМІ
+   ========================================== */
 
-window.startJourney = startJourney;
-window.createSoundMenu = createSoundMenu;
-window.selectSound = selectSound;
-window.selectStage = selectStage;
-window.displayTask = displayTask;
-window.completeTask = completeTask;
-window.previousTask = previousTask;
-window.nextTask = nextTask;
-window.goStages = goStages;
-window.goHome = goHome;
-window.startCamera = startCamera;
-window.stopCamera = stopCamera;
-window.startMicrophone = startMicrophone;
-window.stopMicrophone = stopMicrophone;
-window.showDiploma = showDiploma;
+function renderAssessment() {
+  const totalCompleted =
+    document.getElementById("totalCompleted");
 
+  const totalScore =
+    document.getElementById("totalScore");
 
-// 35. БАҒДАРЛАМАНЫ ТЕКСЕРУ
+  const totalProgress =
+    document.getElementById("totalProgress");
 
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("🌍 Сөйлеу әлеміне саяхат іске қосылды!");
+  const totalProgressBar =
+    document.getElementById("totalProgressBar");
 
-    if (!checkData()) {
-        console.error("data.js файлын жүктеу қатесі!");
-        return;
-    }
+  const completedCount = completedTasks.length;
 
-    let total = 0;
+  const scoreValues =
+    Object.values(selectedScores);
 
-    soundList.forEach(sound => {
-        const tasks = getAllTasksForSound(sound.key);
+  const scoreSum = scoreValues.reduce(
+    (sum, value) => sum + Number(value),
+    0
+  );
 
-        console.log(
-            sound.symbol + " дыбысы:",
-            tasks.length,
-            "тапсырма"
-        );
+  const progress = getTotalProgress();
 
-        total += tasks.length;
+  if (totalCompleted) {
+    totalCompleted.textContent =
+      completedCount + " / 400";
+  }
+
+  if (totalScore) {
+    totalScore.textContent =
+      scoreSum + " балл";
+  }
+
+  if (totalProgress) {
+    totalProgress.textContent =
+      progress + "%";
+  }
+
+  if (totalProgressBar) {
+    totalProgressBar.style.width =
+      progress + "%";
+  }
+
+  renderSoundResults();
+}
+
+function renderSoundResults() {
+  const container =
+    document.getElementById("soundResults");
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  SOUND_ORDER.forEach(key => {
+    const sound = speechTasks[key];
+
+    let soundScore = 0;
+    let scoreCount = 0;
+
+    sound.stages.forEach(stage => {
+      stage.tasks.forEach(task => {
+        const value =
+          selectedScores[key + "-" + task.id];
+
+        if (value !== undefined) {
+          soundScore += Number(value);
+          scoreCount++;
+        }
+      });
     });
 
-    console.log("Жалпы тапсырма саны:", total);
+    const card = document.createElement("div");
 
-    if (total !== 400) {
-        console.warn(
-            "Ескерту: 400 тапсырма табылмады. data.js құрылымын тексер!"
-        );
-    }
+    card.className = "result-card";
+
+    card.innerHTML = `
+      <h3>${soundLabels[key]} дыбысы</h3>
+      <p>Орындалуы: ${getSoundProgress(key)}%</p>
+      <p>Бағаланған тапсырма: ${scoreCount}/40</p>
+      <p>Жиналған балл: ${soundScore}</p>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+
+/* ==========================================
+   19. ДИПЛОМ
+   ========================================== */
+
+function openDiploma() {
+  const page = document.getElementById("diplomaPage");
+
+  if (!page) return;
+
+  showPage("diplomaPage");
+
+  const progress = getTotalProgress();
+
+  setText(
+    "diplomaProgress",
+    progress + "%"
+  );
+
+  setText(
+    "diplomaDate",
+    new Date().toLocaleDateString("kk-KZ")
+  );
+}
+
+function printDiploma() {
+  window.print();
+}
+
+
+/* ==========================================
+   20. БАҒДАРЛАМАНЫ ІСКЕ ҚОСУ
+   ========================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof speechTasks === "undefined") {
+    console.error("data.js файлы жүктелмеген!");
+    return;
+  }
+
+  if (typeof SOUND_ORDER === "undefined") {
+    console.error("SOUND_ORDER табылмады!");
+    return;
+  }
+
+  renderSoundMenu();
+
+  console.log("Сөйлеу әлеміне саяхат іске қосылды.");
+  console.log("Дыбыстар саны:", SOUND_ORDER.length);
 });
