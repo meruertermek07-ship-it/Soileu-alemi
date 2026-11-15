@@ -2812,3 +2812,150 @@ if (document.readyState === "loading") {
 
     initializeProgram();
 }
+// ========================================
+// СЕРГІТУ СӘТІ — ВИДЕОЛАР МЕН ЖАТТЫҒУЛАР
+// ========================================
+
+const relaxationActivities = [
+
+    {
+        category: "dance",
+        title: "💃 Балалар биі — Бәріміз билейік",
+        description:
+            "Музыка ырғағымен еркін қимылда. Қолыңды көтеріп, оңға және солға бұрыл.",
+        videoId: "c8DYyvk86Xk",
+        source: "Қазақша Kids Dance Song"
+    },
+
+    {
+        category: "song",
+        title: "🎵 Оң қолыңмен бип-бип",
+        description:
+            "Әнді тыңдап, көрсетілген қимылдарды қайтала. Қол мен дене қозғалысын үйлестір.",
+        videoId: "s_vPUr9DO4E",
+        source: "Ұлбосын Сабитқызы"
+    },
+
+    {
+        category: "movement",
+        title: "🤸 Қимылды ойындар",
+        description:
+            "Жануарлардың қимылдарын қайтала. Қоян сияқты секір, құс сияқты қанат қақ.",
+        videoId: "0i9SAAmtVSk",
+        source: "ZEREKBALA TV"
+    },
+
+    {
+        category: "breathing",
+        title: "🌬 Тыныс алу жаттығулары",
+        description:
+            "Видеодағы тыныс алу жаттығуларын логопедтің бақылауымен орында.",
+        videoId: "hFUDFLbHNic",
+        source: "EREKSHE BALAQAI"
+    }
+
+];
+
+let currentRelaxationIndex = 0;
+
+
+// БӨЛІМДІ АШУ
+
+function openRelaxationCategory(category) {
+
+    const index = relaxationActivities.findIndex(
+        activity => activity.category === category
+    );
+
+    if (index === -1) {
+        return;
+    }
+
+    currentRelaxationIndex = index;
+
+    showPage("relaxationPage");
+
+    renderRelaxationActivity();
+}
+
+
+// ВИДЕОНЫ КӨРСЕТУ
+
+function renderRelaxationActivity() {
+
+    const activity =
+        relaxationActivities[currentRelaxationIndex];
+
+    if (!activity) {
+        return;
+    }
+
+    const title =
+        document.getElementById("relaxationTitle");
+
+    const content =
+        document.getElementById("relaxationVideo");
+
+    if (title) {
+        title.textContent = activity.title;
+    }
+
+    if (content) {
+
+        content.innerHTML = `
+
+            <div class="relaxation-video-card">
+
+                <p class="relaxation-description">
+                    ${activity.description}
+                </p>
+
+                <div class="video-frame">
+
+                    <iframe
+                        src="https://www.youtube.com/embed/${activity.videoId}"
+                        title="${activity.title}"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                    </iframe>
+
+                </div>
+
+                <p class="video-source">
+                    Бейне дереккөзі: ${activity.source}
+                </p>
+
+                <a
+                    href="https://www.youtube.com/watch?v=${activity.videoId}"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Видеоны YouTube арқылы ашу ↗
+
+                </a>
+
+            </div>
+
+        `;
+    }
+
+}
+
+
+// КЕЛЕСІ ЖАТТЫҒУ
+
+function nextRelaxationActivity() {
+
+    currentRelaxationIndex++;
+
+    if (
+        currentRelaxationIndex >=
+        relaxationActivities.length
+    ) {
+        currentRelaxationIndex = 0;
+    }
+
+    renderRelaxationActivity();
+
+}
