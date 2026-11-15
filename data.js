@@ -4468,3 +4468,144 @@ const speechTasks = {
         ]
     }
 };
+/* =========================================
+   400 ТАПСЫРМАНЫ ТЕКСЕРУ ЖҮЙЕСІ
+   ========================================= */
+
+function checkSpeechProgram() {
+  const soundOrder = [
+    "R", "L", "G", "GH", "K",
+    "Q", "SH", "ZH", "Z", "S"
+  ];
+
+  const errors = [];
+  const warnings = [];
+  const allIds = [];
+
+  let totalTasks = 0;
+
+  soundOrder.forEach(soundKey => {
+    const sound = speechTasks[soundKey];
+
+    if (!sound) {
+      errors.push(`${soundKey}: дыбыс дерегі жоқ`);
+      return;
+    }
+
+    if (!Array.isArray(sound.stages)) {
+      errors.push(`${soundKey}: кезеңдер массиві жоқ`);
+      return;
+    }
+
+    if (sound.stages.length !== 4) {
+      errors.push(`${soundKey}: 4 кезең болуы керек`);
+    }
+
+    sound.stages.forEach((stage, stageIndex) => {
+      const stageNumber = stageIndex + 1;
+
+      if (!Array.isArray(stage.tasks)) {
+        errors.push(
+          `${soundKey}: ${stageNumber}-кезеңде тапсырмалар жоқ`
+        );
+        return;
+      }
+
+      if (stage.tasks.length !== 10) {
+        errors.push(
+          `${soundKey}: ${stageNumber}-кезеңде ${stage.tasks.length} тапсырма бар. 10 болуы керек.`
+        );
+      }
+
+      totalTasks += stage.tasks.length;
+
+      stage.tasks.forEach(task => {
+        if (!task.id) {
+          errors.push(`${soundKey}: тапсырма ID-сіз`);
+        } else {
+          allIds.push(task.id);
+        }
+
+        const requiredFields = [
+          "category",
+          "title",
+          "goal",
+          "instruction",
+          "example",
+          "visual"
+        ];
+
+        requiredFields.forEach(field => {
+          if (
+            !task[field] ||
+            String(task[field]).trim() === ""
+          ) {
+            errors.push(
+              `${task.id || soundKey}: ${field} толтырылмаған`
+            );
+          }
+        });
+
+        if (!task.help) {
+          warnings.push(
+            `${task.id}: көмекші нұсқаулық жоқ`
+          );
+        }
+      });
+
+      // Дайындық кезеңін тексеру
+      if (stageIndex === 0) {
+        const articulationCount = stage.tasks.filter(task =>
+          String(task.category).toLowerCase()
+            .includes("артикуляция")
+        ).length;
+
+        const breathingCount = stage.tasks.filter(task =>
+          String(task.category).toLowerCase()
+            .includes("тыныс")
+        ).length;
+
+        if (articulationCount !== 5) {
+          errors.push(
+            `${soundKey}: дайындық кезеңінде артикуляция тапсырмасы ${articulationCount}. 5 болуы керек.`
+          );
+        }
+
+        if (breathingCount !== 5) {
+          errors.push(
+            `${soundKey}: дайындық кезеңінде тыныс алу тапсырмасы ${breathingCount}. 5 болуы керек.`
+          );
+        }
+      }
+    });
+  });
+
+  // ID қайталануын тексеру
+  const uniqueIds = new Set(allIds);
+
+  if (uniqueIds.size !== allIds.length) {
+    errors.push("Қайталанатын тапсырма ID-лері анықталды.");
+  }
+
+  console.log("========== БАҒДАРЛАМА ТЕКСЕРІСІ ==========");
+  console.log("Дыбыстар саны:", soundOrder.length);
+  console.log("Тапсырмалар саны:", totalTasks);
+  console.log("Бірегей ID саны:", uniqueIds.size);
+
+  if (errors.length === 0) {
+    console.log("Негізгі құрылым тексеруден өтті.");
+  } else {
+    console.error("ҚАТЕЛЕР:", errors);
+  }
+
+  if (warnings.length > 0) {
+    console.warn("ЕСКЕРТУЛЕР:", warnings);
+  }
+
+  return {
+    totalTasks,
+    uniqueIds: uniqueIds.size,
+    errors,
+    warnings
+  };
+}
