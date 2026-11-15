@@ -1,3037 +1,1046 @@
-"use strict";
+/* =====================================================
+СӨЙЛЕУ ӘЛЕМІНЕ САЯХАТ
+Негізгі стильдер
+===================================================== */
 
-/* =========================================
-   1. БАҒДАРЛАМАНЫҢ НЕГІЗГІ ДЕРЕКТЕРІ
-========================================= */
-
-const STORAGE_KEY = "soileuSayahatyProgress";
-
-let currentSound = null;
-let currentStage = 0;
-let currentTask = 0;
-
-let selectedScore = null;
-
-let progressData = JSON.parse(
-  localStorage.getItem(STORAGE_KEY) || "{}"
-);
-
-let cameraStream = null;
-let microphoneStream = null;
-let microphoneAnimation = null;
-
+:root {
+–purple: #7357d8;
+–purple-dark: #5038a5;
+–purple-light: #eee9ff;
+–cyan: #43c6d8;
+–pink: #f28db5;
+–yellow: #ffd66b;
+–mint: #8edcc2;
+–text: #292943;
+–muted: #77778f;
+–white: #ffffff;
+–background: #f7f6ff;
+–border: #e9e5f5;
+–success: #39b98a;
+–shadow: 0 12px 35px rgba(73, 56, 135, 0.10);
+–radius: 22px;
+}
 
-/* =========================================
-   2. КӨМЕКШІ ФУНКЦИЯЛАР
-========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    }
 
-function getElement(id) {
-  return document.getElementById(id);
+html {
+scroll-behavior: smooth;
 }
 
-function saveProgress() {
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(progressData)
-  );
+body {
+min-height: 100vh;
+font-family: “Segoe UI”, Arial, sans-serif;
+color: var(–text);
+background:
+radial-gradient(circle at 5% 5%, #eee8ff 0, transparent 28%),
+radial-gradient(circle at 95% 15%, #e3faff 0, transparent 25%),
+var(–background);
+line-height: 1.6;
 }
 
-function getSoundData(soundKey) {
-  return speechTasks[soundKey];
+button,
+input {
+font: inherit;
 }
 
-function getCurrentTaskData() {
-  const sound = getSoundData(currentSound);
-
-  if (!sound || !sound.stages[currentStage]) {
-    return null;
-  }
-
-  return sound.stages[currentStage].tasks[currentTask];
+button {
+cursor: pointer;
+border: none;
 }
 
-function getTaskKey(sound, stage, task) {
-  return `${sound}_${stage}_${task}`;
+button:focus-visible,
+input:focus-visible {
+outline: 3px solid var(–cyan);
+outline-offset: 3px;
 }
 
-function getTaskRecord(sound, stage, task) {
-  const key = getTaskKey(sound, stage, task);
-
-  return progressData[key] || {
-    completed: false,
-    score: null
-  };
+img,
+video {
+max-width: 100%;
 }
-
-function setTaskRecord(sound, stage, task, record) {
-  const key = getTaskKey(sound, stage, task);
 
-  progressData[key] = record;
-
-  saveProgress();
+.hidden {
+display: none !important;
 }
-
-function countCompletedTasks(soundKey, stageIndex) {
-  const sound = getSoundData(soundKey);
-
-  if (!sound) return 0;
-
-  let count = 0;
 
-  sound.stages[stageIndex].tasks.forEach((task, index) => {
-    const record = getTaskRecord(
-      soundKey,
-      stageIndex,
-      index
-    );
+/* ================= HEADER ================= */
 
-    if (record.completed) count++;
-  });
-
-  return count;
+header {
+position: sticky;
+top: 0;
+z-index: 100;
+width: 100%;
+background: rgba(255, 255, 255, 0.94);
+backdrop-filter: blur(14px);
+border-bottom: 1px solid var(–border);
 }
-
-function countSoundCompleted(soundKey) {
-  const sound = getSoundData(soundKey);
-
-  if (!sound) return 0;
-
-  let count = 0;
 
-  sound.stages.forEach((stage, stageIndex) => {
-    stage.tasks.forEach((task, taskIndex) => {
-      const record = getTaskRecord(
-        soundKey,
-        stageIndex,
-        taskIndex
-      );
-
-      if (record.completed) count++;
-    });
-  });
-
-  return count;
+.header-container,
+.header-inner {
+max-width: 1250px;
+margin: auto;
+padding: 13px 24px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 15px;
 }
-
-function countAllCompleted() {
-  let total = 0;
-
-  SOUND_ORDER.forEach(soundKey => {
-    total += countSoundCompleted(soundKey);
-  });
 
-  return total;
+.logo,
+.logo a {
+color: var(–purple-dark);
+font-size: 20px;
+font-weight: 800;
+text-decoration: none;
 }
 
-
-/* =========================================
-   3. БЕТТЕРДІ АУЫСТЫРУ
-========================================= */
-
-function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(page => {
-    page.classList.remove("active");
-  });
-
-  const target = getElement(pageId);
-
-  if (target) {
-    target.classList.add("active");
-    target.classList.remove("hidden");
-  }
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+.logo span {
+color: var(–cyan);
 }
-
-function toggleMenu() {
-  const menu = getElement("mainMenu");
 
-  if (menu) {
-    menu.classList.toggle("hidden");
-  }
+nav,
+.header-nav {
+display: flex;
+align-items: center;
+gap: 9px;
+flex-wrap: wrap;
 }
-
-
-/* =========================================
-   4. БАСТЫ БЕТТЕН ДЫБЫСТАРҒА ӨТУ
-========================================= */
 
-function startJourney() {
-  renderSoundMenu();
-  showPage("soundPage");
+nav button,
+.header-nav button {
+background: transparent;
+color: var(–text);
+padding: 9px 13px;
+border-radius: 12px;
+font-weight: 600;
+transition: 0.2s;
 }
 
-
-/* =========================================
-   5. ДЫБЫСТАР МӘЗІРІ
-========================================= */
-
-function renderSoundMenu() {
-  const page = getElement("soundPage");
-
-  if (!page) return;
-
-  let container = getElement("soundGrid");
-
-  if (!container) {
-    container = document.createElement("div");
-    container.id = "soundGrid";
-    container.className = "sound-grid";
-    page.appendChild(container);
-  }
-
-  container.innerHTML = "";
-
-  SOUND_ORDER.forEach(soundKey => {
-    const sound = getSoundData(soundKey);
-
-    if (!sound) return;
-
-    const completed = countSoundCompleted(soundKey);
-    const percent = Math.round((completed / 40) * 100);
-
-    const card = document.createElement("button");
-
-    card.className = "sound-card";
-    card.type = "button";
-
-    card.innerHTML = `
-      <span class="sound-letter">${sound.sound}</span>
-      <span class="sound-name">${sound.title}</span>
-      <span class="sound-progress">${percent}%</span>
-      <span class="sound-count">${completed}/40 тапсырма</span>
-    `;
-
-    card.addEventListener("click", () => {
-      openSound(soundKey);
-    });
-
-    container.appendChild(card);
-  });
+nav button:hover,
+.header-nav button:hover {
+background: var(–purple-light);
+color: var(–purple-dark);
 }
-
-
-/* =========================================
-   6. ТАҢДАЛҒАН ДЫБЫСТЫ АШУ
-========================================= */
 
-function openSound(soundKey) {
-  const sound = getSoundData(soundKey);
+/* ================= GENERAL LAYOUT ================= */
 
-  if (!sound) {
-    alert("Бұл дыбыс деректерден табылмады.");
-    return;
-  }
-
-  currentSound = soundKey;
-
-  renderStages();
-
-  showPage("stagePage");
+main,
+.main-container {
+max-width: 1250px;
+width: calc(100% - 40px);
+margin: 28px auto 60px;
 }
-
-
-/* =========================================
-   7. КЕЗЕҢДЕРДІ КӨРСЕТУ
-========================================= */
-
-function renderStages() {
-  const sound = getSoundData(currentSound);
-
-  if (!sound) return;
-
-  const page = getElement("stagePage");
-
-  if (!page) return;
-
-  let container = getElement("stageGrid");
-
-  if (!container) {
-    container = document.createElement("div");
-    container.id = "stageGrid";
-    container.className = "stage-grid";
-    page.appendChild(container);
-  }
-
-  container.innerHTML = "";
-
-  const title = getElement("stageSoundTitle");
-
-  if (title) {
-    title.textContent = sound.title;
-  }
-
-  sound.stages.forEach((stage, index) => {
-    const completed = countCompletedTasks(
-      currentSound,
-      index
-    );
-
-    const percent = completed * 10;
 
-    const card = document.createElement("button");
-
-    card.className = "stage-card";
-    card.type = "button";
-
-    card.innerHTML = `
-      <span class="stage-number">${index + 1}</span>
-      <span class="stage-name">${stage.name}</span>
-      <span class="stage-progress">${percent}%</span>
-      <span class="stage-count">${completed}/10 тапсырма</span>
-      <span class="stage-bar">
-        <span style="width:${percent}%"></span>
-      </span>
-    `;
-
-    card.addEventListener("click", () => {
-      openStage(index);
-    });
-
-    container.appendChild(card);
-  });
+.page {
+display: none;
+animation: pageAppear 0.35s ease;
 }
-
-
-/* =========================================
-   8. КЕЗЕҢДІ АШУ
-========================================= */
-
-function openStage(stageIndex) {
-  const sound = getSoundData(currentSound);
-
-  if (!sound || !sound.stages[stageIndex]) return;
 
-  currentStage = stageIndex;
-  currentTask = 0;
-
-  openTask();
+.page.active,
+.page:not(.hidden) {
+animation: pageAppear 0.35s ease;
 }
-
-
-/* =========================================
-   9. ТАПСЫРМАНЫ КӨРСЕТУ
-========================================= */
-
-function openTask() {
-  const sound = getSoundData(currentSound);
-
-  if (!sound) return;
-
-  const stage = sound.stages[currentStage];
-
-  if (!stage) return;
-
-  const task = stage.tasks[currentTask];
 
-  if (!task) return;
-
-  selectedScore = null;
-
-  const record = getTaskRecord(
-    currentSound,
-    currentStage,
-    currentTask
-  );
-
-  if (record.completed) {
-    selectedScore = record.score;
-  }
-
-  showPage("taskPage");
-
-  setText("taskCounter",
-    `Тапсырма ${currentTask + 1} / 10`
-  );
-
-  setText("stageTitle", stage.name);
-  setText("taskCategory", task.category || "");
-  setText("taskName", task.title || "");
-  setText("taskGoal", task.goal || "");
-  setText("taskMaterials", task.materials || "");
-  setText("taskExercise", task.exercise || "");
-  setText("taskExample", task.example || "");
-  setText("taskHint", task.help || "");
-  setText("taskEvaluation", task.evaluation || "");
-
-  setText(
-    "taskInstruction",
-    Array.isArray(task.instruction)
-      ? task.instruction.join("\n")
-      : task.instruction || ""
-  );
-
-  setText("taskVisual", task.visual || "");
-
-  renderTaskProgress();
-  renderTaskScore();
-  renderTaskExtras(task);
+@keyframes pageAppear {
+from {
+opacity: 0;
+transform: translateY(10px);
 }
-
-function setText(id, value) {
-  const element = getElement(id);
-
-  if (element) {
-    element.textContent = value;
-  }
+to {
+opacity: 1;
+transform: translateY(0);
 }
-
-
-/* =========================================
-   10. ТАПСЫРМА ПРОГРЕСІ
-========================================= */
-
-function renderTaskProgress() {
-  const completed = countCompletedTasks(
-    currentSound,
-    currentStage
-  );
-
-  const percent = completed * 10;
-
-  const bar = getElement("progressBar");
-
-  if (bar) {
-    bar.style.width = `${percent}%`;
-  }
-
-  setText("progressText", `${percent}%`);
 }
-
-
-/* =========================================
-   11. БАҒАЛАУ ШКАЛАСЫ
-========================================= */
-
-function setTaskScore(score) {
-  if (![0, 1, 2, 3].includes(score)) return;
-
-  selectedScore = score;
-
-  document.querySelectorAll("[data-score]").forEach(button => {
-    button.classList.remove("selected");
-
-    if (Number(button.dataset.score) === score) {
-      button.classList.add("selected");
-    }
-  });
-
-  const messages = {
-    3: "Өздігінен орындады ⭐⭐⭐",
-    2: "Аздаған көмекпен орындады ⭐⭐",
-    1: "Көп көмекті қажет етті ⭐",
-    0: "Қайталап орындау қажет"
-  };
-
-  setText("scoreMessage", messages[score]);
-}
-
-function renderTaskScore() {
-  document.querySelectorAll("[data-score]").forEach(button => {
-    button.classList.remove("selected");
-
-    if (
-      selectedScore !== null &&
-      Number(button.dataset.score) === selectedScore
-    ) {
-      button.classList.add("selected");
-    }
-  });
-}
-
-
-/* =========================================
-   12. ТАПСЫРМАНЫ АЯҚТАУ
-========================================= */
-
-function completeTask() {
-  if (selectedScore === null) {
-    alert("Алдымен бағалау шкаласынан ұпай таңда.");
-    return;
-  }
-
-  setTaskRecord(
-    currentSound,
-    currentStage,
-    currentTask,
-    {
-      completed: true,
-      score: selectedScore
-    }
-  );
-
-  renderTaskProgress();
 
-  const sound = getSoundData(currentSound);
-  const stage = sound.stages[currentStage];
-
-  if (currentTask < stage.tasks.length - 1) {
-    currentTask++;
-    openTask();
-  } else {
-    renderStages();
-
-    alert(
-      "Кезеңдегі 10 тапсырма аяқталды! Жарайсың!"
-    );
-
-    showPage("stagePage");
-  }
+.section-heading {
+margin-bottom: 24px;
 }
-
 
-/* =========================================
-   13. АЛДЫҢҒЫ ЖӘНЕ КЕЛЕСІ ТАПСЫРМА
-========================================= */
-
-function nextTask() {
-  const sound = getSoundData(currentSound);
-
-  if (!sound) return;
-
-  const stage = sound.stages[currentStage];
-
-  if (currentTask < stage.tasks.length - 1) {
-    currentTask++;
-    openTask();
-  }
+.section-heading h1,
+.section-heading h2 {
+color: var(–purple-dark);
+margin-bottom: 8px;
 }
 
-function previousTask() {
-  if (currentTask > 0) {
-    currentTask--;
-    openTask();
-  }
+.section-heading p {
+color: var(–muted);
 }
 
+/* ================= HERO ================= */
 
-/* =========================================
-   14. БАҒАЛАУ БЕТІ
-========================================= */
-
-function openAssessment() {
-  renderAssessment();
-  showPage("assessmentPage");
+.hero {
+position: relative;
+overflow: hidden;
+padding: 55px 45px;
+border-radius: 30px;
+background: linear-gradient(120deg, #7357d8, #8d75e9 55%, #53c9d7);
+color: white;
+box-shadow: var(–shadow);
+margin-bottom: 28px;
 }
-
-function renderAssessment() {
-  const total = countAllCompleted();
-
-  const percent = Math.round((total / 400) * 100);
-
-  setText("totalCompleted", `${total}/400`);
-  setText("totalScore", `${percent}%`);
-  setText("totalProgress", `${percent}%`);
-
-  const bar = getElement("totalProgressBar");
-
-  if (bar) {
-    bar.style.width = `${percent}%`;
-  }
-
-  const results = getElement("soundResults");
-
-  if (!results) return;
-
-  results.innerHTML = "";
-
-  SOUND_ORDER.forEach(soundKey => {
-    const sound = getSoundData(soundKey);
-
-    if (!sound) return;
-
-    const completed = countSoundCompleted(soundKey);
-    const percent = Math.round((completed / 40) * 100);
 
-    const row = document.createElement("div");
-
-    row.className = "result-row";
-
-    row.innerHTML = `
-      <strong>${sound.sound}</strong>
-      <span>${completed}/40</span>
-      <span>${percent}%</span>
-    `;
-
-    results.appendChild(row);
-  });
+.hero::before,
+.hero::after {
+content: “”;
+position: absolute;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.12);
 }
 
+.hero::before {
+width: 260px;
+height: 260px;
+right: -60px;
+top: -100px;
+}
 
-/* =========================================
-   15. ДИПЛОМ
-========================================= */
+.hero::after {
+width: 150px;
+height: 150px;
+right: 190px;
+bottom: -100px;
+}
 
-function openDiploma() {
-  const completed = countAllCompleted();
+.hero-content {
+position: relative;
+z-index: 1;
+max-width: 720px;
+}
 
-  const percent = Math.round((completed / 400) * 100);
+.hero h1 {
+font-size: clamp(30px, 5vw, 48px);
+line-height: 1.2;
+margin-bottom: 15px;
+}
 
-  setText("diplomaProgress", `${percent}%`);
+.hero p {
+max-width: 650px;
+font-size: 17px;
+opacity: 0.95;
+margin-bottom: 25px;
+}
 
-  const date = new Date().toLocaleDateString("kk-KZ");
+.hero-decoration {
+position: absolute;
+right: 8%;
+top: 20%;
+font-size: 90px;
+opacity: 0.8;
+}
 
-  setText("diplomaDate", date);
+/* ================= BUTTONS ================= */
 
-  showPage("diplomaPage");
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.action-btn {
+display: inline-flex;
+justify-content: center;
+align-items: center;
+gap: 8px;
+padding: 12px 22px;
+border-radius: 14px;
+font-weight: 700;
+transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-function printDiploma() {
-  window.print();
+.primary-btn {
+color: white;
+background: linear-gradient(135deg, var(–purple), #9278ed);
+box-shadow: 0 7px 18px rgba(115, 87, 216, 0.22);
 }
 
+.primary-btn:hover,
+.secondary-btn:hover,
+.action-btn:hover {
+transform: translateY(-2px);
+}
 
-/* =========================================
-   16. ҚОСЫМША БЕТТЕР
-========================================= */
+.secondary-btn {
+color: var(–purple-dark);
+background: var(–purple-light);
+}
 
-function openRelaxation() {
-  showPage("relaxationPage");
+.danger-btn {
+color: #b83c58;
+background: #fff0f3;
 }
 
-function openMotorSkills() {
-  showPage("motorPage");
+.action-btn {
+color: white;
+background: var(–cyan);
 }
 
-function openRelaxationCategory(category) {
-  const menu = getElement("relaxationMenu");
-  const game = getElement("relaxationGame");
+/* ================= PROGRESS ================= */
 
-  if (menu) menu.classList.add("hidden");
-  if (game) game.classList.remove("hidden");
+.progress-section,
+.progress-card {
+padding: 23px;
+border-radius: var(–radius);
+background: white;
+box-shadow: var(–shadow);
+margin-bottom: 25px;
+}
 
-  const titles = {
-    dance: "Би сергіту сәті",
-    sing: "Ән айту сәті",
-    movement: "Қимылды ойын",
-    animals: "Жануарларға еліктеу"
-  };
+.progress-header {
+display: flex;
+justify-content: space-between;
+gap: 12px;
+margin-bottom: 12px;
+font-weight: 700;
+}
 
-  setText("relaxationTitle", titles[category] || "Сергіту сәті");
+.progress-track,
+.progress-container {
+height: 13px;
+width: 100%;
+border-radius: 30px;
+background: #eeeaf8;
+overflow: hidden;
+}
 
-  setText(
-    "relaxationInstruction",
-    "Қимылды асықпай орында. Қажет болса, үзіліс жаса."
-  );
+.progress-bar,
+.progress-fill,
+#overallProgressBar,
+#progressBar,
+#assessmentProgressBar {
+height: 100%;
+width: 0;
+border-radius: 30px;
+background: linear-gradient(90deg, var(–purple), var(–cyan));
+transition: width 0.4s ease;
 }
 
-function nextRelaxationActivity() {
-  setText(
-    "relaxationInstruction",
-    "Келесі сергіту жаттығуына өт!"
-  );
+.progress-caption {
+margin-top: 10px;
+color: var(–muted);
+font-size: 14px;
 }
 
+/* ================= STATISTICS ================= */
 
-/* =========================================
-   17. БЕТКЕ ҚАЙТУ
-========================================= */
+.stats-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 16px;
+margin: 25px 0;
+}
 
-function backToSounds() {
-  renderSoundMenu();
-  showPage("soundPage");
+.stat-card {
+padding: 22px;
+background: white;
+border-radius: 18px;
+box-shadow: var(–shadow);
+text-align: center;
 }
 
-function backToStages() {
-  renderStages();
-  showPage("stagePage");
+.stat-card strong {
+display: block;
+font-size: 28px;
+color: var(–purple);
 }
-// ==========================================
-// 2-БӨЛІМ. АРТИКУЛЯЦИЯ, КАМЕРА, МИКРОФОН
-// ==========================================
 
+.stat-card span {
+color: var(–muted);
+font-size: 14px;
+}
 
-// Қосымша бөлімдерді көрсету немесе жасыру
-function setSectionVisible(id, visible) {
-    const section = document.getElementById(id);
+/* ================= SOUND GRID ================= */
 
-    if (section) {
-        section.style.display = visible ? "block" : "none";
-    }
+.sound-grid,
+#soundGrid {
+display: grid;
+grid-template-columns: repeat(5, minmax(0, 1fr));
+gap: 17px;
+margin-top: 22px;
 }
-
 
-// Мәтінді қауіпсіз шығару
-function setOptionalText(id, value, fallback = "") {
-    const element = document.getElementById(id);
+.sound-card {
+position: relative;
+min-height: 150px;
+padding: 20px 12px;
+border-radius: 22px;
+background: white;
+box-shadow: var(–shadow);
+border: 2px solid transparent;
+text-align: center;
+transition: 0.25s;
+}
 
-    if (element) {
-        element.textContent = value || fallback;
-    }
+.sound-card:hover {
+transform: translateY(-5px);
+border-color: var(–purple-light);
 }
 
+.sound-card .sound-letter {
+display: block;
+font-size: 48px;
+font-weight: 800;
+color: var(–purple);
+line-height: 1.2;
+}
 
-// Тапсырмаға қосымша материалдарды шығару
-function renderTaskExtras(task) {
+.sound-card h3 {
+margin-top: 8px;
+font-size: 15px;
+}
 
-    // Алдыңғы камераны тоқтату
-    stopCamera();
+.sound-card p {
+color: var(–muted);
+font-size: 12px;
+}
 
-    // Алдыңғы микрофонды тоқтату
-    stopMicrophone();
+.sound-card.completed {
+border-color: var(–mint);
+}
 
-    // Барлық қосымша бөлімдерді бастапқыда жасыру
-    [
-        "articulationSection",
-        "cameraSection",
-        "audioSection",
-        "microphoneSection",
-        "breathingSection"
-    ].forEach(id => setSectionVisible(id, false));
+.sound-card.completed::after {
+content: “✓”;
+position: absolute;
+right: 12px;
+top: 10px;
+color: var(–success);
+font-weight: 800;
+}
 
+/* ================= STAGES ================= */
 
-    // 1. Артикуляциялық үлгі
-    if (task.articulation) {
+.stage-grid,
+#stageGrid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 18px;
+}
 
-        setSectionVisible("articulationSection", true);
+.stage-card {
+padding: 25px;
+border-radius: 22px;
+background: white;
+box-shadow: var(–shadow);
+border: 1px solid var(–border);
+transition: 0.2s;
+}
 
-        setOptionalText(
-            "articulationDescription",
-            task.articulation,
-            "Айна алдында логопедтің нұсқауын орында."
-        );
+.stage-card:hover {
+transform: translateY(-3px);
+border-color: var(–purple);
+}
 
-        setOptionalText(
-            "articulationVisual",
-            task.visual,
-            "Артикуляциялық қалыпты мұқият бақыла."
-        );
+.stage-card h3 {
+color: var(–purple-dark);
+margin-bottom: 8px;
+}
 
-        setOptionalText(
-            "cameraArticulationModel",
-            task.help,
-            "Ерін мен тілдің қалпын айна арқылы бақыла."
-        );
-    }
+.stage-card p {
+color: var(–muted);
+margin-bottom: 14px;
+}
 
+.stage-card .stage-number {
+display: inline-grid;
+place-items: center;
+width: 42px;
+height: 42px;
+border-radius: 14px;
+background: var(–purple-light);
+color: var(–purple-dark);
+font-weight: 800;
+margin-bottom: 13px;
+}
 
-    // 2. Камера
-    if (
-        task.type === "camera" ||
-        task.type === "articulation" ||
-        task.articulation
-    ) {
-        setSectionVisible("cameraSection", true);
-    }
+/* ================= TASK PAGE ================= */
 
+.task-layout {
+display: grid;
+grid-template-columns: minmax(0, 1fr) 300px;
+gap: 22px;
+align-items: start;
+}
 
-    // 3. Аудио үлгі
-    setSectionVisible("audioSection", true);
+.task-card,
+.task-main,
+.task-sidebar {
+background: white;
+border-radius: var(–radius);
+box-shadow: var(–shadow);
+padding: 25px;
+}
 
-    const audioElement = document.getElementById("speechAudio");
+.task-card h2,
+.task-main h2 {
+color: var(–purple-dark);
+margin-bottom: 12px;
+}
 
-    if (audioElement) {
-        audioElement.pause();
-        audioElement.removeAttribute("src");
-        audioElement.load();
-    }
+.task-category,
+#taskCategory {
+display: inline-block;
+padding: 6px 12px;
+border-radius: 30px;
+background: var(–purple-light);
+color: var(–purple-dark);
+font-size: 13px;
+font-weight: 700;
+margin-bottom: 12px;
+}
 
-    const audioUrl = task.audio || task.audioUrl || "";
-
-    if (audioUrl && audioElement) {
-        audioElement.src = audioUrl;
-
-        setOptionalText(
-            "audioStatus",
-            "Аудио үлгі дайын. Тыңдау батырмасын бас."
-        );
-
-        const sampleButton = document.getElementById("speechSample");
-
-        if (sampleButton) {
-            sampleButton.onclick = () => {
-                audioElement.play().catch(() => {
-                    setOptionalText(
-                        "audioStatus",
-                        "Аудионы ойнату мүмкін болмады. Қайта көр."
-                    );
-                });
-            };
-        }
-
-    } else {
-        setOptionalText(
-            "audioStatus",
-            "Бұл тапсырмаға жеке аудио үлгі тіркелмеген. Логопедтің дыбыстау үлгісін пайдалан."
-        );
-    }
+.task-visual,
+#taskVisual {
+min-height: 170px;
+display: grid;
+place-items: center;
+text-align: center;
+padding: 22px;
+margin: 18px 0;
+border-radius: 18px;
+background: linear-gradient(135deg, #f2edff, #e9fbff);
+font-size: 22px;
+}
 
+.task-info {
+padding: 15px;
+margin: 13px 0;
+border-radius: 14px;
+background: #faf9ff;
+}
 
-    // 4. Микрофон
-    if (
-        task.type === "microphone" ||
-        task.type === "breathing" ||
-        task.type === "voice"
-    ) {
-        setSectionVisible("microphoneSection", true);
-    }
+.task-info h3 {
+color: var(–purple-dark);
+font-size: 16px;
+margin-bottom: 5px;
+}
 
+.task-info p,
+.task-info li {
+color: var(–text);
+}
 
-    // 5. Тыныс алу жаттығуы
-    if (
-        task.type === "breathing" ||
-        task.breathing
-    ) {
-        setSectionVisible("breathingSection", true);
-
-        setOptionalText(
-            "blowMessage",
-            task.breathing || "Мұрынмен дем алып, ауыз арқылы баяу дем шығар."
-        );
-    }
+.task-info ul,
+.task-info ol {
+padding-left: 22px;
+}
 
+.task-navigation {
+display: flex;
+justify-content: space-between;
+gap: 12px;
+margin-top: 22px;
+}
 
-    // Бағалау батырмаларын бастапқы күйге келтіру
-    selectedScore = null;
+/* ================= SCORE ================= */
 
-    document.querySelectorAll("[data-score]").forEach(button => {
-        button.classList.remove("selected");
-    });
+.score-panel {
+padding: 20px;
+background: #faf9ff;
+border-radius: 18px;
+margin-top: 20px;
 }
-
 
+.score-buttons {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 10px;
+margin-top: 12px;
+}
 
-// ==========================================
-// КАМЕРА
-// ==========================================
+.score-buttons button {
+padding: 13px 8px;
+border-radius: 12px;
+background: white;
+border: 1px solid var(–border);
+color: var(–text);
+font-weight: 700;
+}
 
-async function startCamera() {
+.score-buttons button:hover,
+.score-buttons button.selected {
+background: var(–purple);
+color: white;
+border-color: var(–purple);
+}
 
-    const video = document.getElementById("cameraVideo");
-    const status = document.getElementById("cameraStatus");
+.score-description {
+margin-top: 10px;
+color: var(–muted);
+font-size: 13px;
+}
 
-    if (!video) {
-        return;
-    }
+/* ================= ARTICULATION ================= */
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+.articulation-section,
+#articulationSection {
+padding: 22px;
+border-radius: 20px;
+background: #f5f1ff;
+margin: 20px 0;
+}
 
-        if (status) {
-            status.textContent =
-                "Камера бұл браузерде қолжетімді емес. HTTPS арқылы ашып көр.";
-        }
+.articulation-visual,
+#articulationVisual,
+#cameraArticulationModel {
+min-height: 180px;
+padding: 20px;
+border-radius: 16px;
+background: white;
+display: grid;
+place-items: center;
+text-align: center;
+}
 
-        return;
-    }
+.articulation-section h3 {
+color: var(–purple-dark);
+margin-bottom: 10px;
+}
 
-    try {
+/* ================= CAMERA ================= */
 
-        stopCamera();
+.camera-section,
+#cameraSection {
+margin: 20px 0;
+padding: 22px;
+border-radius: 20px;
+background: #eefaff;
+}
 
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: "user"
-            },
-            audio: false
-        });
+.camera-frame {
+width: 100%;
+max-width: 560px;
+margin: 15px auto;
+overflow: hidden;
+border-radius: 18px;
+background: #202033;
+aspect-ratio: 4 / 3;
+}
 
-        video.srcObject = cameraStream;
+#cameraVideo {
+width: 100%;
+height: 100%;
+object-fit: cover;
+transform: scaleX(-1);
+}
 
-        video.muted = true;
-        video.playsInline = true;
+#cameraStatus,
+#microphoneStatus,
+#audioStatus {
+color: var(–muted);
+margin: 10px 0;
+}
 
-        await video.play();
+/* ================= AUDIO ================= */
 
-        if (status) {
-            status.textContent =
-                "Камера қосылды. Айнадан ерін мен тілдің қалпын бақыла.";
-        }
+.audio-section,
+#audioSection {
+padding: 20px;
+margin: 20px 0;
+border-radius: 18px;
+background: #f5f1ff;
+}
 
-    } catch (error) {
+audio {
+width: 100%;
+margin-top: 10px;
+}
 
-        console.error("Камера қатесі:", error);
+/* ================= MICROPHONE ================= */
 
-        if (status) {
-            status.textContent =
-                "Камераға рұқсат берілмеді. Браузер баптауынан камераға рұқсат бер.";
-        }
-    }
+.microphone-section,
+#microphoneSection {
+padding: 22px;
+margin: 20px 0;
+border-radius: 20px;
+background: #f0fbf7;
 }
 
-
-function stopCamera() {
+.volume-track {
+width: 100%;
+height: 20px;
+border-radius: 30px;
+background: #dcefe8;
+overflow: hidden;
+margin: 15px 0;
+}
 
-    if (cameraStream) {
+#volumeBar {
+height: 100%;
+width: 0;
+background: linear-gradient(90deg, var(–mint), var(–cyan));
+border-radius: 30px;
+transition: width 0.1s;
+}
 
-        cameraStream.getTracks().forEach(track => {
-            track.stop();
-        });
+/* ================= BREATHING ================= */
 
-        cameraStream = null;
-    }
+.breathing-section,
+#breathingSection {
+text-align: center;
+padding: 25px;
+margin: 20px 0;
+border-radius: 20px;
+background: #fff8e8;
+}
 
-    const video = document.getElementById("cameraVideo");
+.cotton-area {
+min-height: 130px;
+display: grid;
+place-items: center;
+position: relative;
+overflow: hidden;
+}
 
-    if (video) {
-        video.pause();
-        video.srcObject = null;
-    }
+#cotton {
+display: inline-block;
+font-size: 40px;
+transition: transform 0.3s ease;
 }
 
+#blowProgress {
+font-weight: 800;
+color: var(–purple);
+margin: 10px;
+}
 
+/* ================= ASSESSMENT ================= */
 
-// ==========================================
-// МИКРОФОН
-// ==========================================
+.assessment-grid,
+#assessmentResults {
+display: grid;
+gap: 14px;
+}
 
-let audioContext = null;
-let microphoneAnalyser = null;
-let microphoneSource = null;
+.assessment-card {
+padding: 18px;
+background: white;
+border-radius: 16px;
+box-shadow: var(–shadow);
+}
 
+.assessment-card h3 {
+color: var(–purple-dark);
+margin-bottom: 6px;
+}
 
-async function startMicrophone() {
+.assessment-summary {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 15px;
+margin: 20px 0;
+}
 
-    const status = document.getElementById("microphoneStatus");
-    const message = document.getElementById("microphoneMessage");
+.assessment-summary > div {
+padding: 18px;
+background: white;
+border-radius: 16px;
+text-align: center;
+}
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+.assessment-summary strong {
+display: block;
+font-size: 25px;
+color: var(–purple);
+}
 
-        setOptionalText(
-            "microphoneStatus",
-            "Микрофон бұл браузерде қолжетімді емес."
-        );
+/* ================= RELAXATION ================= */
 
-        return;
-    }
+.relaxation-content,
+#relaxationContent {
+padding: 22px;
+background: white;
+border-radius: var(–radius);
+box-shadow: var(–shadow);
+}
 
-    try {
+.relaxation-categories,
+#relaxationCategories {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 15px;
+margin: 20px 0;
+}
 
-        stopMicrophone();
+.relaxation-category {
+padding: 22px;
+border-radius: 18px;
+background: #f5f1ff;
+color: var(–purple-dark);
+font-weight: 700;
+text-align: center;
+}
 
-        microphoneStream = await navigator.mediaDevices.getUserMedia({
-            audio: true
-        });
+.video-card {
+padding: 20px;
+border-radius: 18px;
+background: #f8f7ff;
+margin: 15px 0;
+}
 
-        const AudioContextClass =
-            window.AudioContext || window.webkitAudioContext;
+.video-card h3 {
+margin-bottom: 12px;
+color: var(–purple-dark);
+}
 
-        if (!AudioContextClass) {
-            throw new Error("AudioContext қолжетімсіз");
-        }
+.video-card iframe {
+width: 100%;
+aspect-ratio: 16 / 9;
+border: 0;
+border-radius: 14px;
+}
 
-        audioContext = new AudioContextClass();
+/* ================= MOTOR SKILLS ================= */
 
-        if (audioContext.state === "suspended") {
-            await audioContext.resume();
-        }
+.motor-menu,
+#motorMenu {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 15px;
+}
 
-        microphoneAnalyser = audioContext.createAnalyser();
-        microphoneAnalyser.fftSize = 256;
+.motor-game-card {
+padding: 22px;
+border-radius: 18px;
+background: white;
+box-shadow: var(–shadow);
+text-align: center;
+}
 
-        microphoneSource =
-            audioContext.createMediaStreamSource(microphoneStream);
+.motor-game-card button {
+margin-top: 12px;
+}
 
-        microphoneSource.connect(microphoneAnalyser);
+.motor-game,
+#motorGame {
+padding: 22px;
+margin-top: 20px;
+background: white;
+border-radius: var(–radius);
+box-shadow: var(–shadow);
+}
 
-        if (status) {
-            status.textContent = "Микрофон қосылды.";
-        }
+#motorPlayArea {
+min-height: 250px;
+margin-top: 18px;
+padding: 15px;
+border-radius: 16px;
+background: #f7f5ff;
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+justify-content: center;
+gap: 10px;
+}
 
-        if (message) {
-            message.textContent =
-                "Микрофон тек дыбыс деңгейін көрсетеді. Дыбыстың дұрыс айтылғанын өзі анықтамайды.";
-        }
+.game-cell,
+.memory-card,
+.puzzle-piece {
+min-width: 48px;
+min-height: 48px;
+border-radius: 10px;
+background: white;
+border: 2px solid var(–border);
+font-size: 20px;
+font-weight: 700;
+}
 
-        updateMicrophoneLevel();
+.game-cell:hover,
+.memory-card:hover,
+.puzzle-piece:hover {
+border-color: var(–purple);
+}
 
-    } catch (error) {
+#motorResult {
+margin-top: 15px;
+font-weight: 700;
+color: var(–success);
+}
 
-        console.error("Микрофон қатесі:", error);
+/* ================= DIPLOMA ================= */
 
-        if (status) {
-            status.textContent =
-                "Микрофонға рұқсат берілмеді. Браузер баптауын тексер.";
-        }
-    }
+.diploma,
+#diplomaPage .diploma-card {
+max-width: 850px;
+margin: 25px auto;
+padding: 45px 30px;
+text-align: center;
+background: white;
+border: 8px double var(–yellow);
+border-radius: 20px;
+box-shadow: var(–shadow);
 }
 
+.diploma h1,
+#diplomaPage h1 {
+color: var(–purple-dark);
+font-size: clamp(28px, 5vw, 42px);
+margin-bottom: 15px;
+}
 
-function updateMicrophoneLevel() {
+.diploma-name {
+font-size: 28px;
+color: var(–purple);
+font-weight: 800;
+margin: 20px 0;
+}
 
-    if (!microphoneAnalyser) {
-        return;
-    }
+/* ================= FORMS ================= */
 
-    const data = new Uint8Array(
-        microphoneAnalyser.frequencyBinCount
-    );
+input[type=“text”] {
+width: 100%;
+max-width: 420px;
+padding: 13px 15px;
+border: 1px solid var(–border);
+border-radius: 12px;
+background: white;
+color: var(–text);
+}
 
-    microphoneAnalyser.getByteFrequencyData(data);
+label {
+display: block;
+margin: 8px 0;
+font-weight: 600;
+}
 
-    let total = 0;
+/* ================= FOOTER ================= */
 
-    for (let i = 0; i < data.length; i++) {
-        total += data[i];
-    }
+footer {
+padding: 25px 20px;
+text-align: center;
+color: var(–muted);
+border-top: 1px solid var(–border);
+background: rgba(255, 255, 255, 0.7);
+}
 
-    const average = total / data.length;
+/* ================= RESPONSIVE ================= */
 
-    const percentage = Math.min(
-        100,
-        Math.round(average * 1.8)
-    );
+@media (max-width: 900px) {
+.sound-grid,
+#soundGrid {
+grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 
-    const volumeBar = document.getElementById("volumeBar");
+.task-layout {
+    grid-template-columns: 1fr;
+}
+.motor-menu,
+#motorMenu {
+    grid-template-columns: repeat(2, 1fr);
+}
 
-    if (volumeBar) {
-        volumeBar.style.width = percentage + "%";
-    }
+}
 
-    const status = document.getElementById("microphoneStatus");
+@media (max-width: 600px) {
+.header-container,
+.header-inner {
+padding: 11px 14px;
+align-items: flex-start;
+flex-direction: column;
+}
 
-    if (status) {
+nav,
+.header-nav {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+nav button,
+.header-nav button {
+    white-space: nowrap;
+    font-size: 13px;
+}
+main,
+.main-container {
+    width: calc(100% - 24px);
+    margin-top: 18px;
+}
+.hero {
+    padding: 35px 23px;
+    border-radius: 22px;
+}
+.hero h1 {
+    font-size: 30px;
+}
+.hero p {
+    font-size: 15px;
+}
+.hero-decoration {
+    right: 5%;
+    top: auto;
+    bottom: 5%;
+    font-size: 55px;
+}
+.stats-grid {
+    grid-template-columns: 1fr;
+}
+.sound-grid,
+#soundGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+.sound-card {
+    min-height: 125px;
+    padding: 15px 8px;
+}
+.sound-card .sound-letter {
+    font-size: 38px;
+}
+.stage-grid,
+#stageGrid {
+    grid-template-columns: 1fr;
+}
+.task-card,
+.task-main,
+.task-sidebar {
+    padding: 17px;
+}
+.score-buttons {
+    grid-template-columns: repeat(2, 1fr);
+}
+.task-navigation {
+    flex-direction: column;
+}
+.task-navigation button {
+    width: 100%;
+}
+.relaxation-categories,
+#relaxationCategories {
+    grid-template-columns: 1fr;
+}
+.motor-menu,
+#motorMenu {
+    grid-template-columns: 1fr 1fr;
+}
+.assessment-summary {
+    grid-template-columns: 1fr;
+}
+.diploma,
+#diplomaPage .diploma-card {
+    padding: 25px 15px;
+    border-width: 5px;
+}
 
-        if (percentage < 10) {
-            status.textContent = "Дыбыс деңгейі төмен.";
-        } else if (percentage < 45) {
-            status.textContent = "Дыбыс деңгейі орташа.";
-        } else {
-            status.textContent = "Дыбыс деңгейі жоғары.";
-        }
-    }
+}
 
-    microphoneAnimation =
-        requestAnimationFrame(updateMicrophoneLevel);
+@media print {
+body {
+background: white;
 }
 
-
-function stopMicrophone() {
-
-    if (microphoneAnimation) {
-        cancelAnimationFrame(microphoneAnimation);
-        microphoneAnimation = null;
-    }
-
-    if (microphoneStream) {
-
-        microphoneStream.getTracks().forEach(track => {
-            track.stop();
-        });
-
-        microphoneStream = null;
-    }
-
-    if (microphoneSource) {
-        microphoneSource.disconnect();
-        microphoneSource = null;
-    }
-
-    if (audioContext) {
-        audioContext.close().catch(() => {});
-        audioContext = null;
-    }
-
-    microphoneAnalyser = null;
-
-    const volumeBar = document.getElementById("volumeBar");
-
-    if (volumeBar) {
-        volumeBar.style.width = "0%";
-    }
-}
-
-
-
-// ==========================================
-// ТЫНЫС АЛУ ЖАТТЫҒУЫ
-// ==========================================
-
-let breathingTimer = null;
-
-
-function startBreathingExercise() {
-
-    const cotton = document.getElementById("cotton");
-    const progress = document.getElementById("blowProgress");
-    const message = document.getElementById("blowMessage");
-
-    if (!cotton) {
-        return;
-    }
-
-    clearInterval(breathingTimer);
-
-    let position = 0;
-    let direction = 1;
-
-    if (message) {
-        message.textContent =
-            "Мұрынмен дем ал. Енді ауыз арқылы баяу дем шығар.";
-    }
-
-    breathingTimer = setInterval(() => {
-
-        position += direction * 3;
-
-        if (position >= 180) {
-            direction = -1;
-        }
-
-        if (position <= 0) {
-            direction = 1;
-        }
-
-        cotton.style.transform =
-            `translateX(${position}px)`;
-
-        if (progress) {
-            progress.style.width =
-                Math.round((position / 180) * 100) + "%";
-        }
-
-    }, 50);
-}
-
-
-function stopBreathingExercise() {
-
-    clearInterval(breathingTimer);
-    breathingTimer = null;
-
-    const cotton = document.getElementById("cotton");
-    const progress = document.getElementById("blowProgress");
-
-    if (cotton) {
-        cotton.style.transform = "translateX(0)";
-    }
-
-    if (progress) {
-        progress.style.width = "0%";
-    }
-}
-
-
-
-// ==========================================
-// ҚОСЫМША ҚҰРАЛДАРДЫ ТОҚТАТУ
-// ==========================================
-
-function stopAllMedia() {
-
-    stopCamera();
-    stopMicrophone();
-    stopBreathingExercise();
-}
-// ==========================================
-// 3-БӨЛІМ. ҰСАҚ МОТОРИКА ОЙЫНДАРЫ
-// ==========================================
-
-let currentMotorGame = "";
-let motorScore = 0;
-let motorSelection = null;
-let motorMemoryCards = [];
-let motorMatchedCards = [];
-let motorMazePosition = { x: 0, y: 0 };
-let motorDotStep = 0;
-let motorCanvas = null;
-let motorCanvasContext = null;
-let motorColor = "#e74c3c";
-
-const motorGameNames = {
-    puzzle: "Пазл құрастыру",
-    maze: "Лабиринт",
-    dots: "Сандарды қосып сурет сал",
-    coloring: "Суретті боя",
-    memory: "Есте сақтау ойыны",
-    sorting: "Заттарды сұрыптау",
-    difference: "Айырмашылықты тап",
-    treasure: "Қазынаға жол"
-};
-
-
-// Ойын бастау
-function startMotorGame(gameName) {
-
-    currentMotorGame = gameName;
-    motorScore = 0;
-    motorSelection = null;
-
-    const menu = document.getElementById("motorMenu");
-    const game = document.getElementById("motorGame");
-
-    if (menu) menu.style.display = "none";
-    if (game) game.style.display = "block";
-
-    setOptionalText(
-        "motorTitle",
-        motorGameNames[gameName] || "Ұсақ моторика ойыны"
-    );
-
-    setOptionalText(
-        "motorResult",
-        "Ойынды бастап көр!"
-    );
-
-    const area = document.getElementById("motorPlayArea");
-
-    if (!area) {
-        alert("motorPlayArea элементі index.html ішінде жоқ.");
-        return;
-    }
-
-    area.innerHTML = "";
-
-    switch (gameName) {
-        case "puzzle":
-            createPuzzleGame(area);
-            break;
-
-        case "maze":
-            createMazeGame(area);
-            break;
-
-        case "dots":
-            createDotsGame(area);
-            break;
-
-        case "coloring":
-            createColoringGame(area);
-            break;
-
-        case "memory":
-            createMemoryGame(area);
-            break;
-
-        case "sorting":
-            createSortingGame(area);
-            break;
-
-        case "difference":
-            createDifferenceGame(area);
-            break;
-
-        case "treasure":
-            createTreasureGame(area);
-            break;
-
-        default:
-            area.textContent = "Ойын табылмады.";
-    }
-}
-
-
-// ==========================================
-// 1. ПАЗЛ ҚҰРАСТЫРУ
-// ==========================================
-
-let puzzleTiles = [];
-let puzzleEmpty = 8;
-
-function createPuzzleGame(area) {
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Сандарды ретімен орналастыр. Бос ұяшыққа көршілес тұрған санды жылжыт.";
-    }
-
-    puzzleTiles = [1, 2, 3, 4, 5, 6, 7, 8, 0];
-
-    // Орындарын араластыру
-    for (let i = 0; i < 100; i++) {
-
-        const neighbors = getPuzzleNeighbors(puzzleEmpty);
-        const randomIndex =
-            neighbors[Math.floor(Math.random() * neighbors.length)];
-
-        [puzzleTiles[puzzleEmpty], puzzleTiles[randomIndex]] =
-            [puzzleTiles[randomIndex], puzzleTiles[puzzleEmpty]];
-
-        puzzleEmpty = randomIndex;
-    }
-
-    renderPuzzle(area);
-}
-
-
-function getPuzzleNeighbors(index) {
-
-    const row = Math.floor(index / 3);
-    const col = index % 3;
-
-    const result = [];
-
-    if (row > 0) result.push(index - 3);
-    if (row < 2) result.push(index + 3);
-    if (col > 0) result.push(index - 1);
-    if (col < 2) result.push(index + 1);
-
-    return result;
-}
-
-
-function renderPuzzle(area) {
-
-    area.innerHTML = "";
-
-    const board = document.createElement("div");
-    board.className = "puzzle-board";
-
-    puzzleTiles.forEach((number, index) => {
-
-        const tile = document.createElement("button");
-
-        tile.className = "puzzle-tile";
-        tile.textContent = number === 0 ? "" : number;
-
-        if (number === 0) {
-            tile.classList.add("puzzle-empty");
-        }
-
-        tile.onclick = () => movePuzzleTile(index, area);
-
-        board.appendChild(tile);
-    });
-
-    area.appendChild(board);
-
-    const hint = document.createElement("p");
-    hint.textContent = "Мақсат: 1-ден 8-ге дейінгі сандарды ретімен орналастыр.";
-    area.appendChild(hint);
-}
-
-
-function movePuzzleTile(index, area) {
-
-    if (!getPuzzleNeighbors(puzzleEmpty).includes(index)) {
-        return;
-    }
-
-    [puzzleTiles[index], puzzleTiles[puzzleEmpty]] =
-        [puzzleTiles[puzzleEmpty], puzzleTiles[index]];
-
-    puzzleEmpty = index;
-
-    renderPuzzle(area);
-
-    if (puzzleTiles.every((value, index) => value === (index + 1) % 9)) {
-        setMotorSuccess("Жарайсың! Пазлды дұрыс құрастырдың!");
-    }
-}
-
-
-
-// ==========================================
-// 2. ЛАБИРИНТ
-// ==========================================
-
-const mazeMap = [
-    [0, 1, 0, 0, 0, 0, 0],
-    [0, 1, 0, 1, 1, 1, 0],
-    [0, 0, 0, 1, 0, 0, 0],
-    [1, 1, 0, 1, 0, 1, 0],
-    [0, 0, 0, 0, 0, 1, 0],
-    [0, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 0]
-];
-
-function createMazeGame(area) {
-
-    motorMazePosition = { x: 0, y: 0 };
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Кейіпкерді лабиринттен шығарып, белгіленген есікке жеткіз.";
-    }
-
-    renderMaze(area);
-}
-
-
-function renderMaze(area) {
-
-    area.innerHTML = "";
-
-    const board = document.createElement("div");
-    board.className = "maze-board";
-
-    mazeMap.forEach((row, y) => {
-
-        row.forEach((cell, x) => {
-
-            const box = document.createElement("div");
-            box.className = "maze-cell";
-
-            if (cell === 1) {
-                box.classList.add("maze-wall");
-            }
-
-            if (
-                motorMazePosition.x === x &&
-                motorMazePosition.y === y
-            ) {
-                box.textContent = "🙂";
-                box.classList.add("maze-player");
-            } else if (x === 6 && y === 6) {
-                box.textContent = "🚪";
-            } else {
-                box.textContent = "";
-            }
-
-            board.appendChild(box);
-        });
-    });
-
-    area.appendChild(board);
-
-    const controls = document.createElement("div");
-    controls.className = "maze-controls";
-
-    [
-        ["⬆️", 0, -1],
-        ["⬅️", -1, 0],
-        ["⬇️", 0, 1],
-        ["➡️", 1, 0]
-    ].forEach(([label, dx, dy]) => {
-
-        const button = document.createElement("button");
-        button.textContent = label;
-
-        button.onclick = () => {
-            moveMazePlayer(dx, dy, area);
-        };
-
-        controls.appendChild(button);
-    });
-
-    area.appendChild(controls);
-}
-
-
-function moveMazePlayer(dx, dy, area) {
-
-    const newX = motorMazePosition.x + dx;
-    const newY = motorMazePosition.y + dy;
-
-    if (
-        newX < 0 ||
-        newY < 0 ||
-        newX >= 7 ||
-        newY >= 7
-    ) {
-        return;
-    }
-
-    if (mazeMap[newY][newX] === 1) {
-        setOptionalText("motorResult", "Бұл жол жабық. Басқа бағытты таңда.");
-        return;
-    }
-
-    motorMazePosition.x = newX;
-    motorMazePosition.y = newY;
-
-    renderMaze(area);
-
-    if (newX === 6 && newY === 6) {
-        setMotorSuccess("Тамаша! Лабиринттен шықтың!");
-    }
-}
-
-
-
-// ==========================================
-// 3. НҮКТЕЛЕРДІ САНМЕН ҚОСУ
-// ==========================================
-
-const dotPoints = [
-    [150, 35],
-    [230, 100],
-    [210, 200],
-    [150, 250],
-    [90, 200],
-    [70, 100],
-    [150, 35]
-];
-
-
-function createDotsGame(area) {
-
-    motorDotStep = 0;
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Нүктелерді 1, 2, 3... ретімен басып қос. Соңында сурет пайда болады.";
-    }
-
-    const canvas = document.createElement("canvas");
-
-    canvas.width = 300;
-    canvas.height = 300;
-    canvas.className = "dot-canvas";
-
-    area.appendChild(canvas);
-
-    const context = canvas.getContext("2d");
-
-    drawDotPoints(context);
-
-    canvas.onclick = event => {
-
-        const rect = canvas.getBoundingClientRect();
-
-        const x = (event.clientX - rect.left) *
-            (canvas.width / rect.width);
-
-        const y = (event.clientY - rect.top) *
-            (canvas.height / rect.height);
-
-        const point = dotPoints[motorDotStep];
-
-        if (!point) return;
-
-        const distance = Math.hypot(
-            x - point[0],
-            y - point[1]
-        );
-
-        if (distance < 22) {
-
-            if (motorDotStep > 0) {
-
-                const previous = dotPoints[motorDotStep - 1];
-
-                context.beginPath();
-                context.moveTo(previous[0], previous[1]);
-                context.lineTo(point[0], point[1]);
-                context.strokeStyle = "#6c42c2";
-                context.lineWidth = 4;
-                context.stroke();
-            }
-
-            motorDotStep++;
-
-            drawDotLabels(context);
-
-            if (motorDotStep === dotPoints.length) {
-                setMotorSuccess("Керемет! Суретті аяқтадың!");
-            }
-
-        } else {
-            setOptionalText(
-                "motorResult",
-                "Келесі нүктені мұқият таңда."
-            );
-        }
-    };
-}
-
-
-function drawDotPoints(context) {
-
-    context.clearRect(0, 0, 300, 300);
-
-    dotPoints.forEach((point, index) => {
-
-        context.beginPath();
-        context.arc(point[0], point[1], 9, 0, Math.PI * 2);
-
-        context.fillStyle = "#f3b13f";
-        context.fill();
-
-        context.fillStyle = "#222";
-        context.font = "14px Arial";
-        context.fillText(index + 1, point[0] + 10, point[1] - 10);
-    });
-}
-
-
-function drawDotLabels(context) {
-
-    context.fillStyle = "#222";
-    context.font = "bold 18px Arial";
-
-    context.fillText(
-        "Жалғастыр!",
-        105,
-        285
-    );
-}
-
-
-
-// ==========================================
-// 4. СУРЕТТІ БОЯУ
-// ==========================================
-
-function createColoringGame(area) {
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Түсті таңда. Содан кейін суреттің ішіндегі бөліктерді боя.";
-    }
-
-    const palette = document.createElement("div");
-    palette.className = "color-palette";
-
-    const colors = [
-        "#e74c3c",
-        "#f1c40f",
-        "#2ecc71",
-        "#3498db",
-        "#9b59b6",
-        "#ff8c42",
-        "#ffffff",
-        "#333333"
-    ];
-
-    colors.forEach(color => {
-
-        const button = document.createElement("button");
-
-        button.style.background = color;
-        button.className = "color-button";
-        button.setAttribute("aria-label", color);
-
-        button.onclick = () => {
-            motorColor = color;
-        };
-
-        palette.appendChild(button);
-    });
-
-    area.appendChild(palette);
-
-    const canvas = document.createElement("canvas");
-
-    canvas.width = 320;
-    canvas.height = 300;
-    canvas.className = "coloring-canvas";
-
-    area.appendChild(canvas);
-
-    const ctx = canvas.getContext("2d");
-
-    motorCanvas = canvas;
-    motorCanvasContext = ctx;
-
-    // Гүлдің қарапайым контуры
-    function drawFlower() {
-
-        ctx.clearRect(0, 0, 320, 300);
-
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "#222";
-
-        // Күлтелер
-        const petals = [
-            [160, 85],
-            [205, 125],
-            [190, 180],
-            [130, 180],
-            [115, 125]
-        ];
-
-        petals.forEach(([x, y]) => {
-
-            ctx.beginPath();
-            ctx.arc(x, y, 34, 0, Math.PI * 2);
-            ctx.stroke();
-        });
-
-        // Ортасы
-        ctx.beginPath();
-        ctx.arc(160, 135, 29, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Сабақ
-        ctx.beginPath();
-        ctx.moveTo(160, 210);
-        ctx.lineTo(160, 275);
-        ctx.stroke();
-
-        // Жапырақтар
-        ctx.beginPath();
-        ctx.ellipse(125, 240, 30, 12, -0.4, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.ellipse(195, 255, 30, 12, 0.4, 0, Math.PI * 2);
-        ctx.stroke();
-    }
-
-    drawFlower();
-
-    canvas.addEventListener("click", event => {
-
-        const rect = canvas.getBoundingClientRect();
-
-        const x = (event.clientX - rect.left) *
-            (canvas.width / rect.width);
-
-        const y = (event.clientY - rect.top) *
-            (canvas.height / rect.height);
-
-        ctx.beginPath();
-        ctx.arc(x, y, 13, 0, Math.PI * 2);
-        ctx.fillStyle = motorColor;
-        ctx.fill();
-    });
-
-    const clearButton = document.createElement("button");
-
-    clearButton.textContent = "Қайта бояу";
-
-    clearButton.onclick = drawFlower;
-
-    area.appendChild(clearButton);
-
-    setOptionalText(
-        "motorResult",
-        "Түстерді таңдап, суретті өз қалауыңша боя!"
-    );
-}
-
-
-
-// ==========================================
-// 5. ЕСТЕ САҚТАУ ОЙЫНЫ
-// ==========================================
-
-function createMemoryGame(area) {
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Карточкаларды ашып, бірдей суреттерді тап.";
-    }
-
-    const icons = [
-        "🍎", "🍎",
-        "🐱", "🐱",
-        "🌸", "🌸",
-        "🚗", "🚗",
-        "⭐", "⭐",
-        "🐟", "🐟"
-    ];
-
-    motorMemoryCards = icons
-        .map((value, index) => ({ value, index }))
-        .sort(() => Math.random() - 0.5);
-
-    motorMatchedCards = [];
-
-    let opened = [];
-    let locked = false;
-
-    const grid = document.createElement("div");
-    grid.className = "memory-grid";
-
-    motorMemoryCards.forEach((card, index) => {
-
-        const button = document.createElement("button");
-
-        button.className = "memory-card";
-        button.textContent = "?";
-
-        button.onclick = () => {
-
-            if (
-                locked ||
-                opened.includes(index) ||
-                motorMatchedCards.includes(index)
-            ) {
-                return;
-            }
-
-            button.textContent = card.value;
-            opened.push(index);
-
-            if (opened.length === 2) {
-
-                locked = true;
-
-                const first = opened[0];
-                const second = opened[1];
-
-                if (
-                    motorMemoryCards[first].value ===
-                    motorMemoryCards[second].value
-                ) {
-
-                    motorMatchedCards.push(first, second);
-                    opened = [];
-                    locked = false;
-
-                    if (motorMatchedCards.length === icons.length) {
-                        setMotorSuccess("Жарайсың! Барлық жұпты таптың!");
-                    }
-
-                } else {
-
-                    setTimeout(() => {
-
-                        grid.children[first].textContent = "?";
-                        grid.children[second].textContent = "?";
-
-                        opened = [];
-                        locked = false;
-
-                    }, 800);
-                }
-            }
-        };
-
-        grid.appendChild(button);
-    });
-
-    area.appendChild(grid);
-}
-
-
-
-// ==========================================
-// 6. ЗАТТАРДЫ СҰРЫПТАУ
-// ==========================================
-
-function createSortingGame(area) {
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Әр затты дұрыс санатқа орналастыр. Затты басып, санатты таңда.";
-    }
-
-    const items = [
-        { name: "Алма", icon: "🍎", type: "fruit" },
-        { name: "Алмұрт", icon: "🍐", type: "fruit" },
-        { name: "Сәбіз", icon: "🥕", type: "vegetable" },
-        { name: "Қияр", icon: "🥒", type: "vegetable" },
-        { name: "Мысық", icon: "🐱", type: "animal" },
-        { name: "Ит", icon: "🐶", type: "animal" }
-    ];
-
-    let selectedItem = null;
-    let sortedCount = 0;
-
-    const itemArea = document.createElement("div");
-    itemArea.className = "sorting-items";
-
-    const categories = document.createElement("div");
-    categories.className = "sorting-categories";
-
-    items.forEach(item => {
-
-        const button = document.createElement("button");
-
-        button.className = "sorting-item";
-        button.textContent = item.icon + " " + item.name;
-
-        button.onclick = () => {
-
-            selectedItem = item;
-
-            setOptionalText(
-                "motorResult",
-                item.name + " таңдалды. Енді санатты таңда."
-            );
-
-            itemArea.querySelectorAll("button").forEach(btn => {
-                btn.classList.remove("selected");
-            });
-
-            button.classList.add("selected");
-        };
-
-        itemArea.appendChild(button);
-    });
-
-    const categoryList = [
-        { name: "Жемістер", type: "fruit" },
-        { name: "Көкөністер", type: "vegetable" },
-        { name: "Жануарлар", type: "animal" }
-    ];
-
-    categoryList.forEach(category => {
-
-        const button = document.createElement("button");
-
-        button.className = "drop-zone";
-        button.textContent = category.name;
-
-        button.onclick = () => {
-
-            if (!selectedItem) {
-                setOptionalText(
-                    "motorResult",
-                    "Алдымен бір затты таңда."
-                );
-                return;
-            }
-
-            if (selectedItem.type === category.type) {
-
-                const selectedButton = [...itemArea.children].find(
-                    btn => btn.textContent.includes(selectedItem.name)
-                );
-
-                if (selectedButton) {
-                    selectedButton.disabled = true;
-                    selectedButton.classList.add("sorted");
-                }
-
-                sortedCount++;
-
-                setOptionalText(
-                    "motorResult",
-                    "Дұрыс! " + selectedItem.name +
-                    " — " + category.name.toLowerCase() + "."
-                );
-
-                selectedItem = null;
-
-                if (sortedCount === items.length) {
-                    setMotorSuccess("Барлық затты дұрыс сұрыптадың!");
-                }
-
-            } else {
-
-                setOptionalText(
-                    "motorResult",
-                    "Қайта ойланып көр. Бұл зат басқа санатқа жатады."
-                );
-            }
-        };
-
-        categories.appendChild(button);
-    });
-
-    area.appendChild(itemArea);
-    area.appendChild(categories);
-}
-
-
-
-// ==========================================
-// 7. АЙЫРМАШЫЛЫҚТЫ ТАП
-// ==========================================
-
-function createDifferenceGame(area) {
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Екі кестені салыстыр. Оң жақтағы суреттен өзгеше тұрған ұяшықтарды тап.";
-    }
-
-    const leftPicture = [
-        ["🌸", "🌳", "☀️"],
-        ["🐦", "🌼", "☁️"],
-        ["🌷", "🦋", "🌱"]
-    ];
-
-    const rightPicture = [
-        ["🌸", "🌳", "🌙"],
-        ["🐦", "🌼", "☁️"],
-        ["🌷", "🐝", "🌱"]
-    ];
-
-    const differences = ["0-2", "2-1"];
-    const found = [];
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "difference-wrapper";
-
-    [leftPicture, rightPicture].forEach((picture, pictureIndex) => {
-
-        const grid = document.createElement("div");
-        grid.className = "difference-grid";
-
-        picture.forEach((row, y) => {
-
-            row.forEach((icon, x) => {
-
-                const cell = document.createElement("button");
-
-                cell.textContent = icon;
-
-                if (pictureIndex === 1) {
-
-                    cell.onclick = () => {
-
-                        const key = y + "-" + x;
-
-                        if (differences.includes(key)) {
-
-                            if (!found.includes(key)) {
-
-                                found.push(key);
-
-                                cell.classList.add("difference-found");
-
-                                setOptionalText(
-                                    "motorResult",
-                                    "Дұрыс! Айырмашылық табылды."
-                                );
-
-                                if (found.length === differences.length) {
-                                    setMotorSuccess("Екі айырмашылықты да таптың!");
-                                }
-                            }
-
-                        } else {
-
-                            setOptionalText(
-                                "motorResult",
-                                "Бұл ұяшық бірдей. Басқасын тексер."
-                            );
-                        }
-                    };
-                }
-
-                grid.appendChild(cell);
-            });
-        });
-
-        wrapper.appendChild(grid);
-    });
-
-    area.appendChild(wrapper);
-
-    const labels = document.createElement("div");
-    labels.textContent = "Сол жақтағы сурет   |   Оң жақтағы сурет";
-    area.appendChild(labels);
-}
-
-
-
-// ==========================================
-// 8. ҚАЗЫНАҒА ЖЕТУ
-// ==========================================
-
-const treasureMap = [
-    [0, 0, 1, 0, 0, 0],
-    [1, 0, 1, 0, 1, 0],
-    [0, 0, 0, 0, 1, 0],
-    [0, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 0],
-    [1, 1, 0, 0, 0, 0]
-];
-
-let treasurePosition = { x: 0, y: 0 };
-
-
-function createTreasureGame(area) {
-
-    treasurePosition = { x: 0, y: 0 };
-
-    const instruction = document.getElementById("motorInstruction");
-
-    if (instruction) {
-        instruction.textContent =
-            "Қазынаға жету үшін кедергілерден айналып өт.";
-    }
-
-    renderTreasureMap(area);
-}
-
-
-function renderTreasureMap(area) {
-
-    area.innerHTML = "";
-
-    const board = document.createElement("div");
-    board.className = "maze-board";
-
-    treasureMap.forEach((row, y) => {
-
-        row.forEach((cell, x) => {
-
-            const box = document.createElement("div");
-            box.className = "maze-cell";
-
-            if (cell === 1) {
-                box.classList.add("maze-wall");
-            }
-
-            if (
-                treasurePosition.x === x &&
-                treasurePosition.y === y
-            ) {
-                box.textContent = "🙂";
-            } else if (x === 5 && y === 5) {
-                box.textContent = "💎";
-            }
-
-            board.appendChild(box);
-        });
-    });
-
-    area.appendChild(board);
-
-    const controls = document.createElement("div");
-    controls.className = "maze-controls";
-
-    [
-        ["⬆️", 0, -1],
-        ["⬅️", -1, 0],
-        ["⬇️", 0, 1],
-        ["➡️", 1, 0]
-    ].forEach(([label, dx, dy]) => {
-
-        const button = document.createElement("button");
-
-        button.textContent = label;
-
-        button.onclick = () => {
-            moveTreasure(dx, dy, area);
-        };
-
-        controls.appendChild(button);
-    });
-
-    area.appendChild(controls);
-}
-
-
-function moveTreasure(dx, dy, area) {
-
-    const x = treasurePosition.x + dx;
-    const y = treasurePosition.y + dy;
-
-    if (
-        x < 0 || y < 0 ||
-        x >= 6 || y >= 6 ||
-        treasureMap[y][x] === 1
-    ) {
-        setOptionalText(
-            "motorResult",
-            "Бұл бағытта кедергі бар. Басқа жолды таңда."
-        );
-        return;
-    }
-
-    treasurePosition = { x, y };
-
-    renderTreasureMap(area);
-
-    if (x === 5 && y === 5) {
-        setMotorSuccess("Құттықтаймын! Қазынаны таптың!");
-    }
-}
-
-
-
-// ==========================================
-// ОЙЫНДЫ АЯҚТАУ ЖӘНЕ КЕЛЕСІ ОЙЫН
-// ==========================================
-
-function setMotorSuccess(message) {
-
-    motorScore++;
-
-    setOptionalText(
-        "motorResult",
-        message
-    );
-
-    const result = document.getElementById("motorResult");
-
-    if (result) {
-        result.classList.add("motor-success");
-    }
-}
-
-
-function checkMotorGame() {
-
-    if (!currentMotorGame) {
-        return;
-    }
-
-    setOptionalText(
-        "motorResult",
-        "Ойынды орындап көр. Әрекетіңді аяқтаған соң келесі ойынға өт."
-    );
-}
-
-
-function nextMotorGame() {
-
-    const games = Object.keys(motorGameNames);
-    const currentIndex = games.indexOf(currentMotorGame);
-
-    const nextIndex = currentIndex + 1;
-
-    if (nextIndex >= games.length) {
-
-        const game = document.getElementById("motorGame");
-        const menu = document.getElementById("motorMenu");
-
-        if (game) game.style.display = "none";
-        if (menu) menu.style.display = "block";
-
-        setOptionalText(
-            "motorResult",
-            "Барлық ұсақ моторика ойындарын қарап шықтың!"
-        );
-
-        currentMotorGame = "";
-        return;
-    }
-
-    startMotorGame(games[nextIndex]);
-}
-
-
-function backToMotorMenu() {
-
-    const game = document.getElementById("motorGame");
-    const menu = document.getElementById("motorMenu");
-
-    if (game) game.style.display = "none";
-    if (menu) menu.style.display = "block";
-
-    currentMotorGame = "";
-}
-// ==========================================
-// 4-БӨЛІМ. БАҒАЛАУ ЖҮЙЕСІ
-// ==========================================
-
-const SCORE_DESCRIPTIONS = {
-    3: "Тапсырманы өз бетінше дұрыс орындады.",
-    2: "Тапсырманы аздаған көмектің көмегімен орындады.",
-    1: "Тапсырманы логопедтің едәуір көмегімен орындады.",
-    0: "Тапсырманы әзірге орындай алмады. Қайталау қажет."
-};
-
-
-// Бағалау батырмаларын белгілеу
-function setTaskScore(score) {
-
-    if (![0, 1, 2, 3].includes(score)) {
-        return;
-    }
-
-    selectedScore = score;
-
-    document.querySelectorAll("[data-score]").forEach(button => {
-
-        const buttonScore = Number(
-            button.getAttribute("data-score")
-        );
-
-        button.classList.toggle(
-            "selected",
-            buttonScore === score
-        );
-    });
-
-    setOptionalText(
-        "taskEvaluation",
-        SCORE_DESCRIPTIONS[score]
-    );
-}
-
-
-// Бағалау нәтижесін көрсету
-function renderTaskScore() {
-
-    const record = getTaskRecord();
-
-    selectedScore =
-        record && Number.isInteger(record.score)
-            ? record.score
-            : null;
-
-    document.querySelectorAll("[data-score]").forEach(button => {
-
-        const score = Number(
-            button.getAttribute("data-score")
-        );
-
-        button.classList.toggle(
-            "selected",
-            score === selectedScore
-        );
-    });
-
-    setOptionalText(
-        "taskEvaluation",
-        selectedScore === null
-            ? "Тапсырманы орындағаннан кейін баға қой."
-            : SCORE_DESCRIPTIONS[selectedScore]
-    );
-}
-
-
-// Тапсырманы сақтау
-function completeTask() {
-
-    if (selectedScore === null) {
-
-        alert("Алдымен тапсырмаға 0–3 аралығында баға қой.");
-        return;
-    }
-
-    const key = getTaskKey();
-
-    progressData[key] = {
-        score: selectedScore,
-        completed: true,
-        updatedAt: new Date().toISOString()
-    };
-
-    saveProgress();
-
-    if (selectedScore === 0) {
-        alert("Бұл тапсырманы кейін қайта орындау қажет.");
-    }
-
-    if (currentTask < 9) {
-
-        currentTask++;
-        openTask();
-
-    } else {
-
-        alert("Кезеңдегі 10 тапсырма қарастырылды.");
-        openStage(currentStage);
-    }
-}
-
-
-// ==========================================
-// ТАПСЫРМАЛАРДЫ ЕСЕПТЕУ
-// ==========================================
-
-// Барлық тапсырманың жалпы саны
-function getTotalTaskCount() {
-
-    let total = 0;
-
-    SOUND_ORDER.forEach(soundKey => {
-
-        const sound = speechTasks[soundKey];
-
-        if (!sound || !Array.isArray(sound.stages)) {
-            return;
-        }
-
-        sound.stages.forEach(stage => {
-            total += stage.tasks.length;
-        });
-    });
-
-    return total;
-}
-
-
-// Орындалған тапсырмаларды санау
-function getCompletedTaskCount() {
-
-    let completed = 0;
-
-    Object.values(progressData).forEach(record => {
-
-        if (
-            record &&
-            record.completed === true &&
-            Number.isInteger(record.score)
-        ) {
-            completed++;
-        }
-    });
-
-    return completed;
-}
-
-
-// 0 балл алған тапсырмаларды санау
-function getZeroScoreCount() {
-
-    let count = 0;
-
-    Object.values(progressData).forEach(record => {
-
-        if (
-            record &&
-            record.completed === true &&
-            record.score === 0
-        ) {
-            count++;
-        }
-    });
-
-    return count;
-}
-
-
-// Орташа балды есептеу
-function getAverageScore() {
-
-    const records = Object.values(progressData).filter(record =>
-        record &&
-        record.completed === true &&
-        Number.isInteger(record.score)
-    );
-
-    if (records.length === 0) {
-        return 0;
-    }
-
-    const total = records.reduce(
-        (sum, record) => sum + record.score,
-        0
-    );
-
-    return (total / records.length).toFixed(2);
-}
-
-
-// Жалпы прогресті есептеу
-function getOverallProgress() {
-
-    const total = getTotalTaskCount();
-
-    if (total === 0) {
-        return 0;
-    }
-
-    return Math.round(
-        getCompletedTaskCount() / total * 100
-    );
-}
-
-
-// ==========================================
-// КЕЗЕҢ ПРОГРЕСІ
-// ==========================================
-
-function getStageProgress(soundKey, stageIndex) {
-
-    const sound = speechTasks[soundKey];
-
-    if (!sound || !sound.stages[stageIndex]) {
-        return 0;
-    }
-
-    const tasks = sound.stages[stageIndex].tasks;
-
-    let completed = 0;
-
-    tasks.forEach((task, taskIndex) => {
-
-        const key =
-            `${soundKey}_${stageIndex}_${taskIndex}`;
-
-        const record = progressData[key];
-
-        if (
-            record &&
-            record.completed === true &&
-            Number.isInteger(record.score)
-        ) {
-            completed++;
-        }
-    });
-
-    return Math.round(
-        completed / tasks.length * 100
-    );
-}
-
-
-// ==========================================
-// ДИПЛОМҒА РҰҚСАТТЫ ТЕКСЕРУ
-// ==========================================
-
-function canEarnDiploma() {
-
-    const total = getTotalTaskCount();
-    const completed = getCompletedTaskCount();
-    const zeroScores = getZeroScoreCount();
-
-    return (
-        total === 400 &&
-        completed === 400 &&
-        zeroScores === 0
-    );
-}
-
-
-// ==========================================
-// ДИПЛОМ
-// ==========================================
-
-function openDiploma() {
-
-    const total = getTotalTaskCount();
-    const completed = getCompletedTaskCount();
-    const zeroScores = getZeroScoreCount();
-
-    if (total !== 400) {
-
-        alert(
-            "Бағдарламада 400 тапсырма толық тіркелмеген. " +
-            "Деректер құрылымын тексеру қажет."
-        );
-
-        return;
-    }
-
-    if (completed < 400) {
-
-        alert(
-            "Диплом алу үшін барлық 400 тапсырманы орындау қажет.\n\n" +
-            "Орындалғаны: " + completed + "/400"
-        );
-
-        return;
-    }
-
-    if (zeroScores > 0) {
-
-        alert(
-            "Диплом алу үшін 0 балл алған тапсырмаларды қайталау қажет.\n\n" +
-            "Қайталануы тиіс тапсырмалар: " + zeroScores
-        );
-
-        return;
-    }
-
-    showPage("diplomaPage");
-
-    setOptionalText(
-        "diplomaStudentName",
-        "Білім алушы"
-    );
-
-    setOptionalText(
-        "diplomaDate",
-        new Date().toLocaleDateString("kk-KZ")
-    );
-
-    setOptionalText(
-        "diplomaProgress",
-        "400 / 400 тапсырма"
-    );
-
-    setOptionalText(
-        "diplomaAverage",
-        getAverageScore() + " / 3"
-    );
-}
-
-
-// Дипломды басып шығару
-function printDiploma() {
-
-    if (!canEarnDiploma()) {
-
-        alert("Дипломға қойылатын талаптар әлі орындалған жоқ.");
-        return;
-    }
-
-    window.print();
-}
-
-
-// ==========================================
-// ЖАЛПЫ НӘТИЖЕ КӨРСЕТКІШІ
-// ==========================================
-
-function renderOverallProgress() {
-
-    const progress = getOverallProgress();
-
-    setOptionalText(
-        "overallProgressText",
-        progress + "%"
-    );
-
-    const bar = document.getElementById("overallProgressBar");
-
-    if (bar) {
-        bar.style.width = progress + "%";
-    }
-
-    setOptionalText(
-        "completedTasksCount",
-        getCompletedTaskCount() + " / 400"
-    );
-
-    setOptionalText(
-        "averageScore",
-        getAverageScore()
-    );
-}
-// ==========================================
-// 5-БӨЛІМ. БАҒДАРЛАМАНЫ БІРІКТІРУ
-// ==========================================
-
-
-// Прогресті сақтау функциясын толықтыру
-function saveProgress() {
-
-    try {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(progressData)
-        );
-
-        renderOverallProgress();
-
-    } catch (error) {
-
-        console.error("Прогресті сақтау қатесі:", error);
-
-        alert(
-            "Нәтижені сақтау мүмкін болмады. " +
-            "Браузер жадының бос орнын тексер."
-        );
-    }
-}
-
-
-// ==========================================
-// ДЕРЕКТЕРДІ ТЕКСЕРУ
-// ==========================================
-
-function validateSpeechTasks() {
-
-    const errors = [];
-    let totalTasks = 0;
-
-    if (!speechTasks || !Array.isArray(SOUND_ORDER)) {
-
-        console.error(
-            "speechTasks немесе SOUND_ORDER табылмады."
-        );
-
-        return false;
-    }
-
-    if (SOUND_ORDER.length !== 10) {
-        errors.push(
-            "Дыбыстар саны 10 болуы керек."
-        );
-    }
-
-    SOUND_ORDER.forEach(soundKey => {
-
-        const sound = speechTasks[soundKey];
-
-        if (!sound) {
-            errors.push(
-                soundKey + " дыбысының деректері жоқ."
-            );
-            return;
-        }
-
-        if (!Array.isArray(sound.stages)) {
-
-            errors.push(
-                soundKey + " дыбысының кезеңдері дұрыс берілмеген."
-            );
-
-            return;
-        }
-
-        if (sound.stages.length !== 4) {
-
-            errors.push(
-                soundKey + " дыбысында 4 кезең болуы керек."
-            );
-        }
-
-        sound.stages.forEach((stage, stageIndex) => {
-
-            if (!Array.isArray(stage.tasks)) {
-
-                errors.push(
-                    soundKey + " дыбысының " +
-                    (stageIndex + 1) +
-                    "-кезеңінде тапсырмалар жоқ."
-                );
-
-                return;
-            }
-
-            if (stage.tasks.length !== 10) {
-
-                errors.push(
-                    soundKey + " дыбысының " +
-                    (stageIndex + 1) +
-                    "-кезеңінде 10 тапсырма жоқ."
-                );
-            }
-
-            totalTasks += stage.tasks.length;
-        });
-    });
-
-    if (totalTasks !== 400) {
-        errors.push(
-            "Жалпы тапсырма саны 400 емес. Қазіргі саны: " +
-            totalTasks
-        );
-    }
-
-    if (errors.length > 0) {
-
-        console.error(
-            "Бағдарлама деректеріндегі қателер:",
-            errors
-        );
-
-        return false;
-    }
-
-    console.log(
-        "Тексеру сәтті аяқталды. 10 дыбыс, 4 кезең, 400 тапсырма."
-    );
-
-    return true;
-}
-
-
-// ==========================================
-// КАМЕРА ЖӘНЕ МИКРОФОН БАТЫРМАЛАРЫ
-// ==========================================
-
-function connectMediaButtons() {
-
-    const cameraButton =
-        document.getElementById("startCameraButton");
-
-    const stopCameraButton =
-        document.getElementById("stopCameraButton");
-
-    const microphoneButton =
-        document.getElementById("startMicrophoneButton");
-
-    const stopMicrophoneButton =
-        document.getElementById("stopMicrophoneButton");
-
-    const breathingButton =
-        document.getElementById("startBreathingButton");
-
-    const stopBreathingButton =
-        document.getElementById("stopBreathingButton");
-
-
-    if (cameraButton) {
-        cameraButton.onclick = startCamera;
-    }
-
-    if (stopCameraButton) {
-        stopCameraButton.onclick = stopCamera;
-    }
-
-    if (microphoneButton) {
-        microphoneButton.onclick = startMicrophone;
-    }
-
-    if (stopMicrophoneButton) {
-        stopMicrophoneButton.onclick = stopMicrophone;
-    }
-
-    if (breathingButton) {
-        breathingButton.onclick = startBreathingExercise;
-    }
-
-    if (stopBreathingButton) {
-        stopBreathingButton.onclick = stopBreathingExercise;
-    }
-}
-
-
-// ==========================================
-// БЕТТЕН ШЫҚҚАНДА МЕДИА ТОҚТАТУ
-// ==========================================
-
-document.addEventListener("visibilitychange", () => {
-
-    if (document.hidden) {
-        stopAllMedia();
-    }
-});
-
-
-// ==========================================
-// БЕТТІ ЖАБУ КЕЗІНДЕ
-// ==========================================
-
-window.addEventListener("pagehide", () => {
-    stopAllMedia();
-});
-
-
-// ==========================================
-// БАҒДАРЛАМА БАСТАЛҒАНДА
-// ==========================================
-
-function initializeProgram() {
-
-    console.log(
-        "Сөйлеу әлеміне саяхат бағдарламасы іске қосылды."
-    );
-
-    const isValid = validateSpeechTasks();
-
-    if (!isValid) {
-
-        console.error(
-            "Деректерде қате бар. data.js файлын тексер."
-        );
-
-    }
-
-    renderOverallProgress();
-
-    connectMediaButtons();
-
-    if (typeof renderSoundMenu === "function") {
-        renderSoundMenu();
-    }
-}
-
-
-// DOM толық жүктелгенде іске қосу
-if (document.readyState === "loading") {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        initializeProgram
-    );
-
-} else {
-
-    initializeProgram();
-}
-// ========================================
-// СЕРГІТУ СӘТІ — ВИДЕОЛАР МЕН ЖАТТЫҒУЛАР
-// ========================================
-
-const relaxationActivities = [
-
-    {
-        category: "dance",
-        title: "💃 Балалар биі — Бәріміз билейік",
-        description:
-            "Музыка ырғағымен еркін қимылда. Қолыңды көтеріп, оңға және солға бұрыл.",
-        videoId: "c8DYyvk86Xk",
-        source: "Қазақша Kids Dance Song"
-    },
-
-    {
-        category: "song",
-        title: "🎵 Оң қолыңмен бип-бип",
-        description:
-            "Әнді тыңдап, көрсетілген қимылдарды қайтала. Қол мен дене қозғалысын үйлестір.",
-        videoId: "s_vPUr9DO4E",
-        source: "Ұлбосын Сабитқызы"
-    },
-
-    {
-        category: "movement",
-        title: "🤸 Қимылды ойындар",
-        description:
-            "Жануарлардың қимылдарын қайтала. Қоян сияқты секір, құс сияқты қанат қақ.",
-        videoId: "0i9SAAmtVSk",
-        source: "ZEREKBALA TV"
-    },
-
-    {
-        category: "breathing",
-        title: "🌬 Тыныс алу жаттығулары",
-        description:
-            "Видеодағы тыныс алу жаттығуларын логопедтің бақылауымен орында.",
-        videoId: "hFUDFLbHNic",
-        source: "EREKSHE BALAQAI"
-    }
-
-];
-
-let currentRelaxationIndex = 0;
-
-
-// БӨЛІМДІ АШУ
-
-function openRelaxationCategory(category) {
-
-    const index = relaxationActivities.findIndex(
-        activity => activity.category === category
-    );
-
-    if (index === -1) {
-        return;
-    }
-
-    currentRelaxationIndex = index;
-
-    showPage("relaxationPage");
-
-    renderRelaxationActivity();
-}
-
-
-// ВИДЕОНЫ КӨРСЕТУ
-
-function renderRelaxationActivity() {
-
-    const activity =
-        relaxationActivities[currentRelaxationIndex];
-
-    if (!activity) {
-        return;
-    }
-
-    const title =
-        document.getElementById("relaxationTitle");
-
-    const content =
-        document.getElementById("relaxationVideo");
-
-    if (title) {
-        title.textContent = activity.title;
-    }
-
-    if (content) {
-
-        content.innerHTML = `
-
-            <div class="relaxation-video-card">
-
-                <p class="relaxation-description">
-                    ${activity.description}
-                </p>
-
-                <div class="video-frame">
-
-                    <iframe
-                        src="https://www.youtube.com/embed/${activity.videoId}"
-                        title="${activity.title}"
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen>
-                    </iframe>
-
-                </div>
-
-                <p class="video-source">
-                    Бейне дереккөзі: ${activity.source}
-                </p>
-
-                <a
-                    href="https://www.youtube.com/watch?v=${activity.videoId}"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
-                    Видеоны YouTube арқылы ашу ↗
-
-                </a>
-
-            </div>
-
-        `;
-    }
-
-}
-
-
-// КЕЛЕСІ ЖАТТЫҒУ
-
-function nextRelaxationActivity() {
-
-    currentRelaxationIndex++;
-
-    if (
-        currentRelaxationIndex >=
-        relaxationActivities.length
-    ) {
-        currentRelaxationIndex = 0;
-    }
-
-    renderRelaxationActivity();
-
+header,
+footer,
+button,
+.no-print {
+    display: none !important;
 }
-// ========================================
-// БАҒАЛАУ ЖҮЙЕСІН ЖАҢАРТУ
-// ========================================
-
-function updateAssessmentPage() {
-
-    const completed = getCompletedTaskCount();
-    const total = getTotalTaskCount();
-
-    const percent = total > 0
-        ? Math.round((completed / total) * 100)
-        : 0;
-
-    const progressBar =
-        document.getElementById("assessmentProgressBar");
-
-    const progressText =
-        document.getElementById("assessmentProgressText");
-
-    const completedCount =
-        document.getElementById("assessmentCompletedCount");
-
-    const average =
-        document.getElementById("averageScore");
-
-    if (progressBar) {
-        progressBar.style.width = percent + "%";
-    }
-
-    if (progressText) {
-        progressText.textContent = percent + "%";
-    }
-
-    if (completedCount) {
-        completedCount.textContent =
-            completed + " / " + total;
-    }
-
-    if (average) {
-        average.textContent =
-            getAverageScore().toFixed(1) + " / 3";
-    }
+#diplomaPage {
+    display: block !important;
 }
-
-
-// БАҒАЛАУ БЕТІН АШУ
-
-function openAssessment() {
-
-    showPage("assessmentPage");
-
-    updateAssessmentPage();
-
-    if (typeof renderAssessment === "function") {
-        renderAssessment();
-    }
-
-    updateAssessmentPage();
+.diploma,
+#diplomaPage .diploma-card {
+    box-shadow: none;
+    margin: 0 auto;
 }
-
-
-// ПРОГРЕСТІ САҚТАУ
-
-function saveProgress() {
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(progressData)
-    );
-
-    if (typeof renderOverallProgress === "function") {
-        renderOverallProgress();
-    }
 
-    updateAssessmentPage();
 }
+   
