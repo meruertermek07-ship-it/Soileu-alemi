@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="kk">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#7652bd">
+
+    <meta name="theme-color" content="#7057d9">
+    <meta name="description" content="Балаларға арналған интерактивті логопедиялық түзету бағдарламасы">
 
     <title>Сөйлеу әлеміне саяхат</title>
 
@@ -13,1005 +14,837 @@
 
 <body>
 
-    <!-- =====================================
-         HEADER
-    ====================================== -->
+<!-- =====================================
+     HEADER
+===================================== -->
 
-    <header class="main-header">
+<header class="main-header">
 
-        <div class="logo">
-            <span class="logo-icon">🗣️</span>
+    <div class="header-logo" onclick="showPage('homePage')">
+        <span class="logo-icon">🌈</span>
+        <div>
+            <h1>Сөйлеу әлеміне саяхат</h1>
+            <p>Дыбыстар әлеміне қызықты сапар</p>
+        </div>
+    </div>
 
-            <div>
-                <h1>Сөйлеу әлеміне саяхат</h1>
-                <p>Дислалияны түзету бағдарламасы</p>
+    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Мәзір">
+        ☰
+    </button>
+
+    <nav class="main-nav" id="mainNavigation">
+        <button onclick="showPage('homePage')">Басты бет</button>
+        <button onclick="startJourney()">Дыбыстар</button>
+        <button onclick="openAssessment()">Бағалау</button>
+        <button onclick="openRelaxation()">Сергіту</button>
+        <button onclick="openMotorSkills()">Ұсақ моторика</button>
+        <button onclick="openDiploma()">Диплом</button>
+    </nav>
+
+</header>
+
+
+<!-- =====================================
+     HOME PAGE
+===================================== -->
+
+<main>
+
+<section class="page active" id="homePage">
+
+    <div class="hero-section">
+
+        <div class="hero-text">
+
+            <span class="hero-label">ИНТЕРАКТИВТІ ЛОГОПЕДИЯЛЫҚ БАҒДАРЛАМА</span>
+
+            <h2>
+                Сөйлеу әлеміне
+                <span>саяхат!</span>
+            </h2>
+
+            <p>
+                Дыбыстарды дұрыс айтуға үйрен,
+                қызықты тапсырмаларды орында,
+                өз жетістігіңді бақыла!
+            </p>
+
+            <button class="primary-button" onclick="startJourney()">
+                🚀 Саяхатты бастау
+            </button>
+
+        </div>
+
+        <div class="hero-visual">
+            <div class="hero-planet">🌍</div>
+            <div class="hero-star star-one">⭐</div>
+            <div class="hero-star star-two">✨</div>
+            <div class="hero-cloud">☁️</div>
+            <div class="hero-rainbow">🌈</div>
+        </div>
+
+    </div>
+
+
+    <div class="home-statistics">
+
+        <div class="stat-card">
+            <span>🔤</span>
+            <strong>10</strong>
+            <p>Дыбыс</p>
+        </div>
+
+        <div class="stat-card">
+            <span>📚</span>
+            <strong>4</strong>
+            <p>Түзету кезеңі</p>
+        </div>
+
+        <div class="stat-card">
+            <span>🎯</span>
+            <strong>400</strong>
+            <p>Тапсырма</p>
+        </div>
+
+        <div class="stat-card">
+            <span>🏆</span>
+            <strong>1</strong>
+            <p>Диплом</p>
+        </div>
+
+    </div>
+
+
+    <div class="progress-overview">
+
+        <h3>🌟 Менің жетістіктерім</h3>
+
+        <div class="progress-info">
+            <span>Жалпы орындалу барысы</span>
+            <strong id="overallProgressText">0%</strong>
+        </div>
+
+        <div class="progress-track">
+            <div class="progress-fill" id="overallProgressBar"></div>
+        </div>
+
+        <p>
+            Орындалған тапсырмалар:
+            <strong id="completedTasksCount">0 / 400</strong>
+        </p>
+
+    </div>
+
+
+    <div class="home-features">
+
+        <h2>Бағдарлама мүмкіндіктері</h2>
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+                <span>👄</span>
+                <h3>Артикуляция</h3>
+                <p>Тіл, ерін және жақ жаттығулары.</p>
+            </div>
+
+            <div class="feature-card">
+                <span>🎤</span>
+                <h3>Дыбыстау</h3>
+                <p>Дыбыстарды тыңдау және қайталау.</p>
+            </div>
+
+            <div class="feature-card">
+                <span>📷</span>
+                <h3>Камера-айна</h3>
+                <p>Өз артикуляциялық қалпыңды бақылау.</p>
+            </div>
+
+            <div class="feature-card">
+                <span>🧩</span>
+                <h3>Ойындар</h3>
+                <p>Танымдық және ұсақ моторикалық ойындар.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     SOUND PAGE
+===================================== -->
+
+<section class="page" id="soundPage">
+
+    <div class="section-heading">
+        <button class="back-button" onclick="showPage('homePage')">
+            ← Басты бет
+        </button>
+
+        <h2>🔤 Дыбыстар әлемі</h2>
+
+        <p>Жаттығатын дыбысыңды таңда.</p>
+    </div>
+
+    <div class="sound-grid" id="soundGrid"></div>
+
+</section>
+
+
+<!-- =====================================
+     STAGE PAGE
+===================================== -->
+
+<section class="page" id="stagePage">
+
+    <div class="section-heading">
+
+        <button class="back-button" onclick="backToSounds()">
+            ← Дыбыстарға оралу
+        </button>
+
+        <h2 id="selectedSoundTitle">Дыбыс кезеңдері</h2>
+
+        <p>Төрт кезеңді ретімен орында.</p>
+
+    </div>
+
+    <div class="stage-grid" id="stageGrid"></div>
+
+</section>
+
+
+<!-- =====================================
+     TASK PAGE
+===================================== -->
+
+<section class="page" id="taskPage">
+
+    <div class="task-header">
+
+        <button class="back-button" onclick="backToStages()">
+            ← Кезеңдерге оралу
+        </button>
+
+        <div class="task-progress-info">
+
+            <span id="taskCounter">1 / 10</span>
+
+            <div class="progress-track">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+
+            <span id="progressText">0%</span>
+
+        </div>
+
+    </div>
+
+
+    <div class="task-main-card">
+
+        <div class="task-category" id="taskCategory">
+            Тапсырма
+        </div>
+
+        <h2 id="stageTitle">Дайындық кезеңі</h2>
+
+        <h3 id="taskName">Тапсырма атауы</h3>
+
+
+        <div class="task-visual" id="taskVisual">
+            <span>🌟</span>
+        </div>
+
+
+        <div class="task-information">
+
+            <div class="information-card">
+                <h4>🎯 Мақсаты</h4>
+                <p id="taskGoal"></p>
+            </div>
+
+            <div class="information-card">
+                <h4>🧰 Қажетті материалдар</h4>
+                <p id="taskMaterials"></p>
+            </div>
+
+            <div class="information-card">
+                <h4>📖 Жаттығу</h4>
+                <p id="taskExercise"></p>
+            </div>
+
+            <div class="information-card">
+                <h4>📝 Орындау нұсқаулығы</h4>
+                <ol id="taskInstruction"></ol>
+            </div>
+
+            <div class="information-card example-card">
+                <h4>💡 Мысал</h4>
+                <p id="taskExample"></p>
+            </div>
+
+            <div class="information-card help-card">
+                <h4>🤝 Логопед көмегі</h4>
+                <p id="taskHint"></p>
+            </div>
+
+        </div>
+
+
+        <!-- ARTICULATION -->
+
+        <div class="tool-section" id="articulationSection" hidden>
+
+            <h3>👄 Артикуляциялық үлгі</h3>
+
+            <div id="articulationVisual" class="articulation-visual">
+                👄
+            </div>
+
+            <p id="articulationDescription"></p>
+
+            <div id="cameraArticulationModel"></div>
+
+        </div>
+
+
+        <!-- CAMERA -->
+
+        <div class="tool-section" id="cameraSection" hidden>
+
+            <h3>📷 Камера-айна</h3>
+
+            <p>
+                Камерадан өзіңнің ауыз және тіл қалпыңды бақыла.
+                Бұл құрал дыбыстың дұрыстығын автоматты бағаламайды.
+            </p>
+
+            <video
+                id="cameraVideo"
+                autoplay
+                muted
+                playsinline>
+            </video>
+
+            <p id="cameraStatus">Камера қосылмаған.</p>
+
+            <div class="tool-buttons">
+
+                <button id="startCameraButton">
+                    Камераны қосу
+                </button>
+
+                <button id="stopCameraButton">
+                    Камераны тоқтату
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- AUDIO -->
+
+        <div class="tool-section" id="audioSection" hidden>
+
+            <h3>🔊 Дыбыс үлгісі</h3>
+
+            <p id="speechSample"></p>
+
+            <audio id="speechAudio" controls>
+                Браузер аудионы қолдамайды.
+            </audio>
+
+            <p id="audioStatus">
+                Дыбыс үлгісі қолжетімді болғанда осында көрсетіледі.
+            </p>
+
+        </div>
+
+
+        <!-- MICROPHONE -->
+
+        <div class="tool-section" id="microphoneSection" hidden>
+
+            <h3>🎤 Микрофон жаттығуы</h3>
+
+            <p>
+                Микрофон дыбыс деңгейін ғана көрсетеді.
+                Ол айтылған дыбыстың дұрыстығын анықтамайды.
+            </p>
+
+            <div class="volume-container">
+
+                <div class="volume-track">
+                    <div id="volumeBar"></div>
+                </div>
+
+            </div>
+
+            <p id="microphoneStatus">
+                Микрофон қосылмаған.
+            </p>
+
+            <p id="microphoneMessage">
+                Микрофонды қосып, дыбыс деңгейін бақыла.
+            </p>
+
+            <div class="tool-buttons">
+
+                <button id="startMicrophoneButton">
+                    Микрофонды қосу
+                </button>
+
+                <button id="stopMicrophoneButton">
+                    Тоқтату
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- BREATHING -->
+
+        <div class="tool-section" id="breathingSection" hidden>
+
+            <h3>🌬 Тыныс алу жаттығуы</h3>
+
+            <p>
+                Ауа ағынын бірқалыпты шығаруға арналған жаттығу.
+            </p>
+
+            <div class="breathing-playground">
+
+                <div id="cotton">☁️</div>
+
+                <div class="breathing-finish">
+                    🏁
+                </div>
+
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill" id="blowProgress"></div>
+            </div>
+
+            <p id="blowMessage">
+                Жаттығуды бастауға дайынсың ба?
+            </p>
+
+            <button id="startBreathingButton">
+                Бастау
+            </button>
+
+            <button id="stopBreathingButton">
+                Тоқтату
+            </button>
+
+        </div>
+
+
+        <!-- TASK EVALUATION -->
+
+        <div class="task-evaluation" id="taskEvaluation">
+
+            <h3>⭐ Тапсырманы бағалау</h3>
+
+            <p>
+                Орындау барысына сәйкес бағалауды таңда.
+            </p>
+
+            <div class="score-buttons">
+
+                <button onclick="setTaskScore(3)">
+                    3 — Өздігінен орындады
+                </button>
+
+                <button onclick="setTaskScore(2)">
+                    2 — Аздаған көмекпен
+                </button>
+
+                <button onclick="setTaskScore(1)">
+                    1 — Көп көмектің көмегімен
+                </button>
+
+                <button onclick="setTaskScore(0)">
+                    0 — Қайта жаттығу қажет
+                </button>
+
+            </div>
+
+            <p id="selectedScoreText">
+                Баға таңдалмаған.
+            </p>
+
+            <p id="taskEvaluationText"></p>
+
+            <button
+                class="primary-button"
+                onclick="completeTask()">
+                Тапсырманы аяқтау
+            </button>
+
+        </div>
+
+
+        <div class="task-navigation">
+
+            <button onclick="previousTask()">
+                ← Алдыңғы тапсырма
+            </button>
+
+            <button onclick="nextTask()">
+                Келесі тапсырма →
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     ASSESSMENT PAGE
+===================================== -->
+
+<section class="page" id="assessmentPage">
+
+    <div class="section-heading">
+
+        <button class="back-button" onclick="showPage('homePage')">
+            ← Басты бет
+        </button>
+
+        <h2>📊 Бағалау және жетістіктер</h2>
+
+        <p>Орындалған тапсырмалардың нәтижесін бақыла.</p>
+
+    </div>
+
+
+    <div class="assessment-summary">
+
+        <div class="assessment-card">
+            <span>📚</span>
+            <h3 id="assessmentCompletedCount">0 / 400</h3>
+            <p>Орындалған тапсырма</p>
+        </div>
+
+        <div class="assessment-card">
+            <span>⭐</span>
+            <h3 id="averageScore">0 / 3</h3>
+            <p>Орташа баға</p>
+        </div>
+
+    </div>
+
+
+    <div class="assessment-progress">
+
+        <h3>Жалпы прогресс</h3>
+
+        <div class="progress-track">
+            <div
+                class="progress-fill"
+                id="assessmentProgressBar">
             </div>
         </div>
 
-        <button
-            class="menu-button"
-            type="button"
-            onclick="toggleMenu()"
-            aria-label="Мәзірді ашу">
-            ☰
+        <strong id="assessmentProgressText">0%</strong>
+
+    </div>
+
+
+    <div class="assessment-results" id="assessmentResults"></div>
+
+</section>
+
+
+<!-- =====================================
+     RELAXATION PAGE
+===================================== -->
+
+<section class="page" id="relaxationPage">
+
+    <div class="section-heading">
+
+        <button class="back-button" onclick="showPage('homePage')">
+            ← Басты бет
         </button>
 
-        <nav id="mainMenu">
+        <h2>🎵 Сергіту әлемі</h2>
 
-            <button onclick="showPage('homePage')" type="button">
-                Басты бет
-            </button>
+        <p>Қозғал, биле, ән айт және демал!</p>
 
-            <button onclick="startJourney()" type="button">
-                Дыбыстар
-            </button>
-
-            <button onclick="openRelaxation()" type="button">
-                Сергіту сәті
-            </button>
-
-            <button onclick="openMotorSkills()" type="button">
-                Ұсақ моторика
-            </button>
-
-            <button onclick="openAssessment()" type="button">
-                Бағалау
-            </button>
-
-            <button onclick="openDiploma()" type="button">
-                Диплом
-            </button>
-
-        </nav>
-
-    </header>
+    </div>
 
 
-    <!-- =====================================
-         MAIN
-    ====================================== -->
+    <div class="relaxation-categories" id="relaxationCategories">
 
-    <main>
+        <button onclick="openRelaxationCategory('dance')">
+            💃 Би билеу
+        </button>
 
+        <button onclick="openRelaxationCategory('song')">
+            🎵 Ән айту
+        </button>
 
-        <!-- =================================
-             1. БАСТЫ БЕТ
-        ================================== -->
+        <button onclick="openRelaxationCategory('movement')">
+            🤸 Қимылды ойын
+        </button>
 
-        <section id="homePage" class="page active">
+        <button onclick="openRelaxationCategory('breathing')">
+            🌬 Тыныс алу
+        </button>
 
-            <div class="hero-section">
-
-                <div class="hero-content">
-
-                    <p class="hero-label">
-                        ИНТЕРАКТИВТІ ЛОГОПЕДИЯЛЫҚ БАҒДАРЛАМА
-                    </p>
-
-                    <h2>
-                        Сөйлеу әлеміне саяхат
-                    </h2>
-
-                    <p>
-                        Дыбыстарды дұрыс айтуға үйрен!
-                        Қызықты тапсырмаларды орында,
-                        сөйлеу дағдыларыңды дамыт!
-                    </p>
-
-                    <button
-                        class="primary-button"
-                        type="button"
-                        onclick="startJourney()">
-
-                        Саяхатты бастау →
-
-                    </button>
-
-                </div>
+    </div>
 
 
-                <div class="hero-illustration">
+    <div class="relaxation-content" id="relaxationContent">
 
-                    <div class="hero-book">📚</div>
-                    <div class="hero-star">⭐</div>
-                    <div class="hero-puzzle">🧩</div>
-                    <div class="hero-rainbow">🌈</div>
+        <div class="video-card">
 
-                </div>
+            <h3 id="relaxationTitle">
+                Сергіту жаттығуын таңда
+            </h3>
 
-            </div>
-
-
-            <!-- Бағдарлама туралы -->
-
-            <div class="program-statistics">
-
-                <div class="stat-card">
-                    <strong>10</strong>
-                    <span>Дыбыс</span>
-                </div>
-
-                <div class="stat-card">
-                    <strong>4</strong>
-                    <span>Кезең</span>
-                </div>
-
-                <div class="stat-card">
-                    <strong>400</strong>
-                    <span>Тапсырма</span>
-                </div>
-
-            </div>
-
-
-            <!-- Жалпы прогресс -->
-
-            <div class="overall-progress-card">
-
-                <h3>Менің жетістіктерім</h3>
-
-                <div class="progress-track">
-
-                    <div
-                        id="overallProgressBar"
-                        class="progress-fill">
-                    </div>
-
-                </div>
-
-                <p id="overallProgressText">0%</p>
+            <div id="relaxationVideo">
 
                 <p>
-                    Орындалған тапсырмалар:
-                    <strong id="completedTasksCount">
-                        0 / 400
-                    </strong>
+                    Мұнда таңдалған сергіту видеосы көрсетіледі.
                 </p>
 
             </div>
 
-        </section>
+        </div>
 
+        <button
+            class="primary-button"
+            onclick="nextRelaxationActivity()">
+            Келесі жаттығу →
+        </button>
 
+    </div>
 
-        <!-- =================================
-             2. ДЫБЫСТАР МӘЗІРІ
-        ================================== -->
+</section>
 
-        <section id="soundPage" class="page">
 
-            <div class="section-heading">
+<!-- =====================================
+     MOTOR SKILLS PAGE
+===================================== -->
 
-                <button
-                    onclick="showPage('homePage')"
-                    type="button">
-                    ← Басты бет
-                </button>
+<section class="page" id="motorPage">
 
-                <h2>Дыбысты таңда</h2>
+    <div class="section-heading">
 
-                <p>
-                    Өзіңе қажетті дыбысты таңдап,
-                    түзету жұмысын баста.
-                </p>
+        <button class="back-button" onclick="showPage('homePage')">
+            ← Басты бет
+        </button>
 
-            </div>
+        <h2>🧩 Ұсақ моторика әлемі</h2>
 
-            <div id="soundGrid" class="sound-grid"></div>
+        <p>Ойна, құрастыр, тап және зертте!</p>
 
-        </section>
+    </div>
 
 
+    <div class="motor-menu" id="motorMenu">
 
-        <!-- =================================
-             3. КЕЗЕҢДЕР
-        ================================== -->
+        <button onclick="startMotorGame('puzzle')">
+            🧩
+            <strong>Пазл</strong>
+            <span>Бөлшектерді құрастыр</span>
+        </button>
 
-        <section id="stagePage" class="page">
+        <button onclick="startMotorGame('maze')">
+            🌀
+            <strong>Лабиринт</strong>
+            <span>Шығу жолын тап</span>
+        </button>
 
-            <div class="section-heading">
+        <button onclick="startMotorGame('dots')">
+            🔵
+            <strong>Нүктелерді қос</strong>
+            <span>Суретті аяқта</span>
+        </button>
 
-                <button
-                    onclick="backToSounds()"
-                    type="button">
-                    ← Дыбыстарға оралу
-                </button>
+        <button onclick="startMotorGame('coloring')">
+            🎨
+            <strong>Бояу</strong>
+            <span>Суретті боя</span>
+        </button>
 
-                <h2 id="stageSoundTitle">
-                    Дыбысты түзету кезеңдері
-                </h2>
+        <button onclick="startMotorGame('memory')">
+            🧠
+            <strong>Есте сақтау</strong>
+            <span>Жұптарды тап</span>
+        </button>
 
-                <p>
-                    Әр кезеңде 10 тапсырма орналасқан.
-                </p>
+        <button onclick="startMotorGame('sorting')">
+            📦
+            <strong>Сұрыптау</strong>
+            <span>Заттарды топтастыр</span>
+        </button>
 
-            </div>
+        <button onclick="startMotorGame('differences')">
+            🔍
+            <strong>Айырмашылықты тап</strong>
+            <span>Суреттерді салыстыр</span>
+        </button>
 
-            <div id="stageGrid" class="stage-grid"></div>
+        <button onclick="startMotorGame('treasure')">
+            💎
+            <strong>Қазына жолы</strong>
+            <span>Қазынаны ізде</span>
+        </button>
 
-        </section>
+    </div>
 
 
+    <div class="motor-game" id="motorGame" hidden>
 
-        <!-- =================================
-             4. ТАПСЫРМАЛАР
-        ================================== -->
+        <h3 id="motorTitle">Ойын атауы</h3>
 
-        <section id="taskPage" class="page">
-
-            <div class="task-header">
-
-                <button
-                    onclick="backToStages()"
-                    type="button">
-                    ← Кезеңдерге оралу
-                </button>
-
-                <h2 id="stageTitle">
-                    Тапсырма
-                </h2>
-
-                <p id="taskCounter">
-                    1 / 10
-                </p>
-
-            </div>
-
-
-            <!-- Тапсырма прогресі -->
-
-            <div class="task-progress">
-
-                <div class="progress-track">
-
-                    <div
-                        id="progressBar"
-                        class="progress-fill">
-                    </div>
-
-                </div>
-
-                <p id="progressText">0%</p>
-
-            </div>
-
-
-            <!-- Тапсырма карточкасы -->
-
-            <article class="task-card">
-
-                <p id="taskCategory"></p>
-
-                <h2 id="taskName">
-                    Тапсырма атауы
-                </h2>
-
-                <div
-                    id="taskVisual"
-                    class="task-visual">
-                </div>
-
-
-                <div class="task-information">
-
-                    <h3>🎯 Мақсаты</h3>
-                    <p id="taskGoal"></p>
-
-                    <h3>🧰 Қажетті материалдар</h3>
-                    <p id="taskMaterials"></p>
-
-                    <h3>📖 Жаттығу</h3>
-                    <p id="taskExercise"></p>
-
-                    <h3>📝 Орындау нұсқаулығы</h3>
-                    <div id="taskInstruction"></div>
-
-                    <h3>💡 Мысал</h3>
-                    <p id="taskExample"></p>
-
-                    <h3>🤝 Көмек</h3>
-                    <p id="taskHint"></p>
-
-                </div>
-
-            </article>
-
-
-
-            <!-- АРТИКУЛЯЦИЯЛЫҚ ҮЛГІ -->
-
-            <section
-                id="articulationSection"
-                class="media-card"
-                style="display:none">
-
-                <h3>👄 Артикуляциялық үлгі</h3>
-
-                <div id="articulationVisual"></div>
-
-                <p id="articulationDescription"></p>
-
-                <div id="cameraArticulationModel"></div>
-
-            </section>
-
-
-
-            <!-- КАМЕРА -->
-
-            <section
-                id="cameraSection"
-                class="media-card"
-                style="display:none">
-
-                <h3>📷 Артикуляциялық айна</h3>
-
-                <p>
-                    Камера арқылы ерін мен бет қимылдарын
-                    өзің бақыла.
-                </p>
-
-                <video
-                    id="cameraVideo"
-                    autoplay
-                    muted
-                    playsinline>
-                </video>
-
-                <p id="cameraStatus">
-                    Камера қосылмаған.
-                </p>
-
-                <div class="media-buttons">
-
-                    <button
-                        id="startCameraButton"
-                        type="button">
-                        📷 Камераны қосу
-                    </button>
-
-                    <button
-                        id="stopCameraButton"
-                        type="button">
-                        Камераны тоқтату
-                    </button>
-
-                </div>
-
-                <p class="small-note">
-                    Камера сөйлеу дұрыстығын автоматты бағаламайды.
-                    Ол тек артикуляциялық қимылдарды бақылауға арналған.
-                </p>
-
-            </section>
-
-
-
-            <!-- АУДИО -->
-
-            <section
-                id="audioSection"
-                class="media-card"
-                style="display:none">
-
-                <h3>🔊 Дыбыстау үлгісі</h3>
-
-                <p>
-                    Дыбыстау үлгісін тыңдап, қайтала.
-                </p>
-
-                <button
-                    id="speechSample"
-                    type="button">
-                    Аудионы тыңдау
-                </button>
-
-                <audio
-                    id="speechAudio"
-                    controls>
-                </audio>
-
-                <p id="audioStatus">
-                    Аудио үлгі тіркелмеген.
-                </p>
-
-            </section>
-
-
-
-            <!-- МИКРОФОН -->
-
-            <section
-                id="microphoneSection"
-                class="media-card"
-                style="display:none">
-
-                <h3>🎤 Дыбыс деңгейін бақылау</h3>
-
-                <p>
-                    Дыбыстау кезінде микрофон деңгейін бақыла.
-                </p>
-
-                <div class="media-buttons">
-
-                    <button
-                        id="startMicrophoneButton"
-                        type="button">
-                        Микрофонды қосу
-                    </button>
-
-                    <button
-                        id="stopMicrophoneButton"
-                        type="button">
-                        Микрофонды тоқтату
-                    </button>
-
-                </div>
-
-
-                <div class="volume-track">
-
-                    <div
-                        id="volumeBar"
-                        class="volume-fill">
-                    </div>
-
-                </div>
-
-                <p id="microphoneStatus">
-                    Микрофон қосылмаған.
-                </p>
-
-                <p id="microphoneMessage">
-                    Микрофон дыбыс деңгейін ғана көрсетеді.
-                </p>
-
-            </section>
-
-
-
-            <!-- ТЫНЫС АЛУ ЖАТТЫҒУЫ -->
-
-            <section
-                id="breathingSection"
-                class="media-card"
-                style="display:none">
-
-                <h3>🌬 Тыныс алу жаттығуы</h3>
-
-                <p>
-                    Жаттығуды асықпай, логопедтің нұсқауымен орында.
-                </p>
-
-                <div class="cotton-track">
-
-                    <div id="cotton">☁️</div>
-
-                </div>
-
-                <div class="progress-track">
-
-                    <div
-                        id="blowProgress"
-                        class="progress-fill">
-                    </div>
-
-                </div>
-
-                <p id="blowMessage"></p>
-
-                <div class="media-buttons">
-
-                    <button
-                        id="startBreathingButton"
-                        type="button">
-                        Жаттығуды бастау
-                    </button>
-
-                    <button
-                        id="stopBreathingButton"
-                        type="button">
-                        Тоқтату
-                    </button>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- ТАПСЫРМАНЫ БАҒАЛАУ -->
-
-            <section class="task-score-card">
-
-                <h3>📊 Тапсырманы бағалау</h3>
-
-                <p>
-                    Орындау нәтижесіне сәйкес бағаны таңда.
-                </p>
-
-                <div class="score-buttons">
-
-                    <button
-                        type="button"
-                        data-score="3"
-                        onclick="setTaskScore(3)">
-                        3 — Өз бетінше орындады
-                    </button>
-
-                    <button
-                        type="button"
-                        data-score="2"
-                        onclick="setTaskScore(2)">
-                        2 — Аздаған көмекпен орындады
-                    </button>
-
-                    <button
-                        type="button"
-                        data-score="1"
-                        onclick="setTaskScore(1)">
-                        1 — Көп көмектің көмегімен орындады
-                    </button>
-
-                    <button
-                        type="button"
-                        data-score="0"
-                        onclick="setTaskScore(0)">
-                        0 — Қайталау қажет
-                    </button>
-
-                </div>
-
-                <p id="taskEvaluation">
-                    Бағалау үшін балды таңда.
-                </p>
-
-                <button
-                    class="primary-button"
-                    onclick="completeTask()"
-                    type="button">
-                    Бағаны сақтау
-                </button>
-
-
-                <div class="task-navigation">
-
-                    <button
-                        onclick="previousTask()"
-                        type="button">
-                        ← Алдыңғы тапсырма
-                    </button>
-
-                    <button
-                        onclick="nextTask()"
-                        type="button">
-                        Келесі тапсырма →
-                    </button>
-
-                </div>
-
-            </section>
-
-        </section>
-
-
-
-        <!-- =================================
-             5. БАҒАЛАУ БӨЛІМІ
-        ================================== -->
-
-        <section id="assessmentPage" class="page">
-
-            <div class="section-heading">
-
-                <button
-                    onclick="backToSounds()"
-                    type="button">
-                    ← Артқа
-                </button>
-
-                <h2>📊 Менің нәтижелерім</h2>
-
-                <p>
-                    Орындалған тапсырмалар мен бағалау көрсеткіштері.
-                </p>
-
-            </div>
-
-
-            <div class="assessment-card">
-
-                <h3>Жалпы орындалу көрсеткіші</h3>
-
-                <div class="progress-track">
-
-                    <div
-                        id="assessmentProgressBar"
-                        class="progress-fill">
-                    </div>
-
-                </div>
-
-                <p id="assessmentProgressText">0%</p>
-
-                <p>
-                    Орындалған тапсырмалар:
-                    <strong id="assessmentCompletedCount">
-                        0 / 400
-                    </strong>
-                </p>
-
-                <p>
-                    Орташа балл:
-                    <strong id="averageScore">
-                        0 / 3
-                    </strong>
-                </p>
-
-                <button
-                    onclick="renderAssessment()"
-                    type="button">
-                    Нәтижені жаңарту
-                </button>
-
-            </div>
-
-
-            <div id="assessmentResults"></div>
-
-        </section>
-
-
-
-        <!-- =================================
-             6. СЕРГІТУ СӘТІ
-        ================================== -->
-
-        <section id="relaxationPage" class="page">
-
-            <div class="section-heading">
-
-                <button
-                    onclick="backToSounds()"
-                    type="button">
-                    ← Артқа
-                </button>
-
-                <h2>🌈 Сергіту сәті</h2>
-
-                <p>
-                    Қызықты бейнежаттығулар арқылы демалып,
-                    қимыл-қозғалыс белсенділігін арттыр!
-                </p>
-
-            </div>
-
-
-            <!-- Сергіту санаттары -->
-
-            <div
-                id="relaxationCategories"
-                class="activity-grid">
-
-                <button
-                    onclick="openRelaxationCategory('dance')"
-                    type="button">
-
-                    <span>💃</span>
-                    <strong>Би билеу</strong>
-
-                    <small>
-                        Музыка ырғағымен қимылдау
-                    </small>
-
-                </button>
-
-
-                <button
-                    onclick="openRelaxationCategory('song')"
-                    type="button">
-
-                    <span>🎵</span>
-                    <strong>Ән айту</strong>
-
-                    <small>
-                        Ән мен қимылды үйлестіру
-                    </small>
-
-                </button>
-
-
-                <button
-                    onclick="openRelaxationCategory('movement')"
-                    type="button">
-
-                    <span>🤸</span>
-                    <strong>Қимылды ойындар</strong>
-
-                    <small>
-                        Дене қимылдарын қайталау
-                    </small>
-
-                </button>
-
-
-                <button
-                    onclick="openRelaxationCategory('breathing')"
-                    type="button">
-
-                    <span>🌬️</span>
-                    <strong>Тыныс алу</strong>
-
-                    <small>
-                        Тыныс алу жаттығулары
-                    </small>
-
-                </button>
-
-            </div>
-
-
-            <!-- Таңдалған видео -->
-
-            <div
-                id="relaxationActivity"
-                class="relaxation-activity">
-
-                <div
-                    class="relaxation-content">
-
-                    <div class="video-card">
-
-                        <h3 id="relaxationTitle">
-                            🎵 Қимыл-қозғалыс жаттығуы
-                        </h3>
-
-                        <p>
-                            Жоғарыдағы санаттардың бірін таңдап,
-                            бейнежаттығуды баста.
-                        </p>
-
-                        <div id="relaxationVideo">
-
-                            <div class="video-placeholder">
-
-                                <span>▶️</span>
-
-                                <p>
-                                    Мұнда таңдалған сергіту видеосы көрсетіледі.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="relaxation-navigation">
-
-                    <button
-                        onclick="nextRelaxationActivity()"
-                        type="button">
-                        Келесі жаттығу →
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================
-             7. ҰСАҚ МОТОРИКА
-        ================================== -->
-
-        <section id="motorPage" class="page">
-
-            <div class="section-heading">
-
-                <button
-                    onclick="backToSounds()"
-                    type="button">
-                    ← Артқа
-                </button>
-
-                <h2>🧩 Ұсақ моторика әлемі</h2>
-
-                <p>
-                    Қол саусақтарының қимылын,
-                    зейін мен есте сақтауды дамыт.
-                </p>
-
-            </div>
-
-
-            <!-- Ойындар мәзірі -->
-
-            <div id="motorMenu" class="activity-grid">
-
-                <button
-                    onclick="startMotorGame('puzzle')"
-                    type="button">
-                    🧩 Суретті пазл
-                </button>
-
-                <button
-                    onclick="startMotorGame('maze')"
-                    type="button">
-                    🌀 Лабиринт
-                </button>
-
-                <button
-                    onclick="startMotorGame('dots')"
-                    type="button">
-                    🔢 Нүктелерді қос
-                </button>
-
-                <button
-                    onclick="startMotorGame('coloring')"
-                    type="button">
-                    🎨 Бояу
-                </button>
-
-                <button
-                    onclick="startMotorGame('memory')"
-                    type="button">
-                    🧠 Есте сақтау
-                </button>
-
-                <button
-                    onclick="startMotorGame('sorting')"
-                    type="button">
-                    🧺 Сұрыптау
-                </button>
-
-                <button
-                    onclick="startMotorGame('difference')"
-                    type="button">
-                    🔍 Айырмашылықты тап
-                </button>
-
-                <button
-                    onclick="startMotorGame('treasure')"
-                    type="button">
-                    💎 Қазынаға жол
-                </button>
-
-            </div>
-
-
-            <!-- Ойын алаңы -->
-
-            <div
-                id="motorGame"
-                style="display:none">
-
-                <h2 id="motorTitle">
-                    Ойын атауы
-                </h2>
-
-                <p id="motorInstruction">
-                    Ойын нұсқаулығы
-                </p>
-
-                <div id="motorPlayArea"></div>
-
-                <p id="motorResult"></p>
-
-                <div class="motor-controls">
-
-                    <button
-                        onclick="checkMotorGame()"
-                        type="button">
-                        Нәтижені тексеру
-                    </button>
-
-                    <button
-                        onclick="nextMotorGame()"
-                        type="button">
-                        Келесі ойын →
-                    </button>
-
-                    <button
-                        onclick="backToMotorMenu()"
-                        type="button">
-                        Ойындарға оралу
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================
-             8. ДИПЛОМ
-        ================================== -->
-
-        <section id="diplomaPage" class="page">
-
-            <div class="diploma-card">
-
-                <h1>🏆 ДИПЛОМ</h1>
-
-                <h2>ДЫБЫСТАР ШЕБЕРІ</h2>
-
-                <p>
-                    «Сөйлеу әлеміне саяхат» логопедиялық
-                    түзету бағдарламасының барлық тапсырмаларын
-                    сәтті орындағаны үшін марапатталады.
-                </p>
-
-                <h2 id="diplomaStudentName">
-                    Білім алушы
-                </h2>
-
-                <p id="diplomaProgress">
-                    400 / 400 тапсырма
-                </p>
-
-                <p>
-                    Орташа бағасы:
-                    <strong id="diplomaAverage">
-                        0 / 3
-                    </strong>
-                </p>
-
-                <p id="diplomaDate"></p>
-
-                <button
-                    onclick="printDiploma()"
-                    type="button">
-                    🖨 Дипломды басып шығару
-                </button>
-
-                <button
-                    onclick="backToSounds()"
-                    type="button">
-                    Бағдарламаға оралу
-                </button>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-
-    <!-- =====================================
-         FOOTER
-    ====================================== -->
-
-    <footer class="main-footer">
-
-        <p>
-            © 2026 «Сөйлеу әлеміне саяхат»
+        <p id="motorInstruction">
+            Ойын нұсқаулығы
         </p>
 
+        <div id="motorPlayArea"></div>
+
+        <p id="motorResult"></p>
+
+        <div class="motor-controls">
+
+            <button onclick="backToMotorMenu()">
+                ← Ойындарға оралу
+            </button>
+
+            <button onclick="nextMotorGame()">
+                Келесі ойын →
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     DIPLOMA PAGE
+===================================== -->
+
+<section class="page" id="diplomaPage">
+
+    <div class="section-heading">
+
+        <button class="back-button" onclick="showPage('homePage')">
+            ← Басты бет
+        </button>
+
+        <h2>🏆 Менің дипломым</h2>
+
+        <p>Жетістіктеріңді осында көре аласың.</p>
+
+    </div>
+
+
+    <div class="diploma-card" id="diplomaCard">
+
+        <div class="diploma-decoration">🌟 🏆 🌟</div>
+
+        <h2>ДЫБЫСТАР ШЕБЕРІ</h2>
+
+        <h3>ЖЕТІСТІК ДИПЛОМЫ</h3>
+
+        <p>Бұл диплом</p>
+
+        <input
+            type="text"
+            id="diplomaStudentName"
+            placeholder="Баланың аты-жөні">
+
         <p>
-            Интерактивті логопедиялық түзету бағдарламасы
+            «Сөйлеу әлеміне саяхат» бағдарламасын
+            орындаудағы жетістігі үшін беріледі.
         </p>
 
-    </footer>
+        <div class="diploma-statistics">
+
+            <p>
+                Орындалу көрсеткіші:
+                <strong id="diplomaProgress">0%</strong>
+            </p>
+
+            <p>
+                Орташа бағасы:
+                <strong id="diplomaAverage">0 / 3</strong>
+            </p>
+
+            <p>
+                Күні:
+                <strong id="diplomaDate">—</strong>
+            </p>
+
+        </div>
+
+        <div class="diploma-footer">
+            🌈 Сөйлеу әлеміне саяхат 🌈
+        </div>
+
+    </div>
 
 
+    <div class="diploma-actions">
 
-    <!-- =====================================
-         JAVASCRIPT
-    ====================================== -->
+        <button onclick="openDiploma()">
+            Нәтижені жаңарту
+        </button>
 
-    <script src="data.js"></script>
-    <script src="script.js"></script>
+        <button onclick="printDiploma()">
+            🖨 Дипломды басып шығару
+        </button>
 
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- =====================================
+     FOOTER
+===================================== -->
+
+<footer class="main-footer">
+
+    <div class="footer-logo">
+        🌈 Сөйлеу әлеміне саяхат
+    </div>
+
+    <p>
+        Интерактивті логопедиялық түзету бағдарламасы
+    </p>
+
+    <p>
+        © 2026 Барлық құқықтар қорғалған.
+    </p>
+
+</footer>
+
+
+<!-- =====================================
+     JAVASCRIPT FILES
+===================================== -->
+
+<script src="data.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
